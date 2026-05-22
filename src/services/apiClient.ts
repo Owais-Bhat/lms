@@ -3,7 +3,7 @@ import * as SecureStore from 'expo-secure-store';
 const BASE_URL = 'https://api.freeapi.app/api/v1';
 const ACCESS_TOKEN_KEY = 'auth_access_token';
 const REFRESH_TOKEN_KEY = 'auth_refresh_token';
-const TIMEOUT_MS = 10000; // 10 seconds timeout
+const TIMEOUT_MS = 10000; 
 
 export interface ApiError extends Error {
   statusCode?: number;
@@ -18,7 +18,6 @@ interface FetchOptions extends RequestInit {
   skipAuth?: boolean;
 }
 
-// Global flag to prevent multiple refresh calls simultaneously
 let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
 
@@ -59,7 +58,7 @@ export const apiClient = {
 
     const url = `${BASE_URL}${endpoint}`;
     
-    // 1. Prepare Headers (Request Interceptor)
+    
     const headers = new Headers(initOptions.headers || {});
     if (!headers.has('Content-Type')) {
       headers.set('Content-Type', 'application/json');
@@ -73,7 +72,7 @@ export const apiClient = {
       }
     }
 
-    // 2. Setup Fetch with Timeout
+    
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
 
@@ -87,17 +86,17 @@ export const apiClient = {
       const response = await fetch(url, config);
       clearTimeout(id);
 
-      // 3. Response Interceptor for Token Refresh
+      
       if (response.status === 401 && !skipAuth && endpoint !== '/users/refresh-token') {
         try {
           const newAccessToken = await handleTokenRefresh();
           if (newAccessToken) {
-            // Retry request with new token
+            
             headers.set('Authorization', `Bearer ${newAccessToken}`);
             return await apiClient.request<T>(endpoint, { ...options, headers });
           }
         } catch (refreshErr) {
-          // Refresh failed, clear tokens and let app redirect to login
+          
           await apiClient.clearTokens();
           throw refreshErr;
         }
@@ -117,14 +116,14 @@ export const apiClient = {
     } catch (error: any) {
       clearTimeout(id);
 
-      // Handle abort / timeout
+      
       if (error.name === 'AbortError') {
         const timeoutError: ApiError = new Error('Request timed out. Please check your network connection.');
         timeoutError.statusCode = 408;
         throw timeoutError;
       }
 
-      // Retry mechanism for network failures (not status errors)
+      
       if (retry > 0 && (!error.statusCode || error.statusCode >= 500)) {
         await new Promise((resolve) => setTimeout(resolve, retryDelay));
         return apiClient.request<T>(endpoint, {
@@ -172,7 +171,7 @@ export const apiClient = {
 
   upload<T>(endpoint: string, formData: FormData, options?: FetchOptions): Promise<T> {
     const headers = new Headers(options?.headers || {});
-    // Fetch automatically sets boundary for Multipart Form Data if we omit Content-Type header
+    
     headers.delete('Content-Type');
 
     return apiClient.request<T>(endpoint, {

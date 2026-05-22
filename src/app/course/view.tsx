@@ -32,7 +32,7 @@ export default function CourseWebViewScreen() {
 
   const course = courses.find((c) => c.id === id);
 
-  // Fetch access token for custom headers
+  
   useEffect(() => {
     SecureStore.getItemAsync('auth_access_token').then((token) => {
       setAccessToken(token);
@@ -64,7 +64,7 @@ export default function CourseWebViewScreen() {
     );
   }
 
-  // Handle messages sent from the WebView (Web-to-Native bridge)
+  
   const handleWebViewMessage = (event: any) => {
     try {
       const messageData = JSON.parse(event.nativeEvent.data);
@@ -84,7 +84,7 @@ export default function CourseWebViewScreen() {
     }
   };
 
-  // Inject JavaScript from Native to Web
+  
   const injectTip = () => {
     const tips = [
       '💡 Study Tip: Keep notes as you study the fundamentals.',
@@ -101,12 +101,12 @@ export default function CourseWebViewScreen() {
     webViewRef.current?.reload();
   };
 
-  // Generate html template
+  
   const htmlContent = getCourseHtmlTemplate(course);
 
   return (
     <View className="flex-1 bg-slate-950">
-      {/* Native Progress Tracker overlay */}
+      
       <View className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex-row items-center justify-between">
         <View className="flex-1 mr-4">
           <Text className="text-slate-400 text-xs font-semibold uppercase tracking-wider">
@@ -127,7 +127,7 @@ export default function CourseWebViewScreen() {
         </View>
       </View>
 
-      {/* Main content body */}
+      
       <View className="flex-1 relative">
         {errorOccurred ? (
           <View className="flex-1 justify-center items-center px-6">
@@ -165,7 +165,7 @@ export default function CourseWebViewScreen() {
           />
         )}
 
-        {/* Loading Spinner */}
+        
         {webViewLoading && !errorOccurred && (
           <View className="absolute inset-0 bg-slate-950 items-center justify-center">
             <ActivityIndicator size="large" color="#3b82f6" />
@@ -174,7 +174,7 @@ export default function CourseWebViewScreen() {
         )}
       </View>
 
-      {/* Footer Native Control bar */}
+      
       <View className="bg-slate-900 border-t border-slate-800 px-6 py-4 flex-row items-center justify-between">
         <Text className="text-slate-400 text-xs font-semibold flex-1 mr-4">
           Send a native progress notification to the active WebView layout:
@@ -191,6 +191,5 @@ export default function CourseWebViewScreen() {
   );
 }
 
-// Custom hook helper workaround to import useLayoutEffect safely
 import { useLayoutEffect as reactUseLayoutEffect } from 'react';
 const useLayoutEffect = reactUseLayoutEffect;

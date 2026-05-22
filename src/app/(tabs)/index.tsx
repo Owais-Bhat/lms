@@ -54,7 +54,7 @@ export default function CourseCatalogScreen() {
 
   return (
     <View className="flex-1">
-      {/* Offline Banner */}
+      
       {isOffline && (
         <View className="bg-amber-600/90 py-2.5 px-4 flex-row items-center justify-center space-x-2 border-b border-amber-500/20">
           <WifiOff size={16} color="#ffffff" />
@@ -64,7 +64,7 @@ export default function CourseCatalogScreen() {
         </View>
       )}
 
-      {/* Error Banner */}
+      
       {error && !isOffline && (
         <View className="bg-red-500/10 border-b border-red-500/20 py-2.5 px-4 flex-row justify-between items-center">
           <Text className="text-red-400 text-xs font-medium flex-1 mr-2" numberOfLines={1}>
@@ -80,7 +80,7 @@ export default function CourseCatalogScreen() {
         </View>
       )}
 
-      {/* Search Bar Header */}
+      
       <View className={`px-4 py-3 border-b ${isDark ? 'bg-slate-950 border-slate-900' : 'bg-white border-slate-100'}`}>
         <View className={`flex-row items-center px-4 py-2.5 rounded-xl border ${
           isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-100'
@@ -97,7 +97,7 @@ export default function CourseCatalogScreen() {
         </View>
       </View>
 
-      {/* Course List / Loader */}
+      
       {isLoading && courses.length === 0 ? (
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color="#3b82f6" />

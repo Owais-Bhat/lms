@@ -28,7 +28,7 @@ export const CourseCard = React.memo(({
         isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-100 shadow-sm'
       }`}
     >
-      {/* Course Image */}
+      
       <View className="relative h-44 w-full bg-slate-800">
         <Image
           source={course.thumbnail}
@@ -36,7 +36,7 @@ export const CourseCard = React.memo(({
           transition={200}
           className="h-full w-full"
         />
-        {/* Rating and category badges */}
+        
         <View className="absolute top-3 left-3 flex-row space-x-2">
           <View className="bg-slate-950/80 px-2.5 py-1 rounded-full flex-row items-center border border-slate-800">
             <Star size={12} color="#fbbf24" fill="#fbbf24" />
@@ -51,7 +51,7 @@ export const CourseCard = React.memo(({
           </View>
         </View>
 
-        {/* Bookmark Icon */}
+        
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={onBookmarkToggle}
@@ -65,9 +65,9 @@ export const CourseCard = React.memo(({
         </TouchableOpacity>
       </View>
 
-      {/* Content Details */}
+      
       <View className="p-4">
-        {/* Instructor Block */}
+        
         <View className="flex-row items-center space-x-2.5 mb-2.5">
           <Image
             source={course.instructor.avatar}
@@ -79,17 +79,17 @@ export const CourseCard = React.memo(({
           </Text>
         </View>
 
-        {/* Course Title */}
+        
         <Text className={`text-base font-bold mb-1.5 ${isDark ? 'text-white' : 'text-slate-900'}`} numberOfLines={2}>
           {course.title}
         </Text>
 
-        {/* Course Description */}
+        
         <Text className={`text-xs mb-3.5 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`} numberOfLines={2}>
           {course.description}
         </Text>
 
-        {/* Footer info: Price / CTA */}
+        
         <View className="flex-row justify-between items-center pt-3 border-t border-slate-800/20 dark:border-slate-800">
           <Text className={`text-lg font-extrabold ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
             ${course.price.toFixed(2)}

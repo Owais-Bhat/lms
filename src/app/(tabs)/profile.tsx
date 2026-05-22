@@ -33,7 +33,7 @@ export default function ProfileScreen() {
           style: 'destructive',
           onPress: async () => {
             await logout();
-            router.replace('/(auth)/login');
+            router.replace('/login');
           },
         },
       ]
@@ -41,7 +41,7 @@ export default function ProfileScreen() {
   };
 
   const handlePickImage = async () => {
-    // Request media library permission
+    
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       Alert.alert('Permission Denied', 'Permission to access media library is required to change profile picture.');
@@ -60,12 +60,12 @@ export default function ProfileScreen() {
     }
   };
 
-  // Fallback avatar URL if user has no avatar
+  
   const avatarUrl = user?.avatar?.url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300';
 
   return (
     <ScrollView className={`flex-1 ${isDark ? 'bg-slate-950' : 'bg-slate-50'}`}>
-      {/* Header Profile Section */}
+      
       <View className={`items-center pt-8 pb-6 px-6 border-b ${
         isDark ? 'bg-slate-900/40 border-slate-900' : 'bg-white border-slate-100 shadow-sm'
       }`}>
@@ -92,7 +92,7 @@ export default function ProfileScreen() {
         </Text>
       </View>
 
-      {/* User Info Details card */}
+      
       <View className="p-4 mt-2">
         <View className={`rounded-3xl p-5 border ${
           isDark ? 'bg-slate-900/80 border-slate-900' : 'bg-white border-slate-100 shadow-sm'
@@ -123,14 +123,14 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* Statistics Block */}
+      
       <View className="px-4">
         <Text className={`text-sm font-bold uppercase tracking-wider mb-3 ml-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
           Learning Statistics
         </Text>
 
         <View className="flex-row flex-wrap justify-between">
-          {/* Card 1: Enrolled */}
+          
           <View className={`w-[48%] mb-4 rounded-3xl p-4 border ${
             isDark ? 'bg-slate-900/80 border-slate-900' : 'bg-white border-slate-100 shadow-sm'
           }`}>
@@ -145,7 +145,7 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          {/* Card 2: Bookmarks */}
+          
           <View className={`w-[48%] mb-4 rounded-3xl p-4 border ${
             isDark ? 'bg-slate-900/80 border-slate-900' : 'bg-white border-slate-100 shadow-sm'
           }`}>
@@ -160,7 +160,7 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          {/* Card 3: Completed */}
+          
           <View className={`w-[48%] mb-4 rounded-3xl p-4 border ${
             isDark ? 'bg-slate-900/80 border-slate-900' : 'bg-white border-slate-100 shadow-sm'
           }`}>
@@ -175,7 +175,7 @@ export default function ProfileScreen() {
             </Text>
           </View>
 
-          {/* Card 4: Hours */}
+          
           <View className={`w-[48%] mb-4 rounded-3xl p-4 border ${
             isDark ? 'bg-slate-900/80 border-slate-900' : 'bg-white border-slate-100 shadow-sm'
           }`}>
@@ -192,7 +192,7 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* Action list */}
+      
       <View className="p-4 mb-10">
         <TouchableOpacity
           activeOpacity={0.8}

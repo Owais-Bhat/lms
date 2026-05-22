@@ -1,6 +1,7 @@
 import { Stack } from "expo-router";
 import { useColorScheme } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import "../global.css";
 
 export default function RootLayout() {
@@ -8,7 +9,7 @@ export default function RootLayout() {
   const isDark = colorScheme === "dark";
 
   return (
-    <>
+    <SafeAreaProvider>
       <StatusBar style={isDark ? "light" : "dark"} />
       <Stack
         screenOptions={{
@@ -30,6 +31,6 @@ export default function RootLayout() {
         <Stack.Screen name="course/[id]" options={{ title: "Course Details" }} />
         <Stack.Screen name="course/view" options={{ title: "Embedded Course" }} />
       </Stack>
-    </>
+    </SafeAreaProvider>
   );
 }

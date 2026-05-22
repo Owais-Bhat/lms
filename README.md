@@ -1,107 +1,78 @@
-# Aether LMS Mobile Application (React Native Expo)
+# Aether LMS Mobile Application
 
-A high-performance, premium Mini LMS Mobile Application developed using React Native Expo SDK 54, TypeScript, NativeWind (Tailwind CSS for React Native), and Zustand. 
+A high-performance, premium Mini LMS Mobile Application developed using React Native Expo SDK 54, TypeScript, NativeWind, LegendList, and Zustand. 
 
----
-
-## 🌟 Key Features
-
-1. **Authentication & Session Persistence**:
-   - Implements Register and Login pages against `https://api.freeapi.app/api/v1/users` endpoints.
-   - Integrates **Expo SecureStore** for high-security storage of auth tokens (`accessToken`, `refreshToken`).
-   - Implements **Auto-Login** session validation and restoration upon app restart.
-   - Incorporates automated JWT refresh interceptors with retry logic.
-
-2. **Dynamic Course Catalog**:
-   - Integrates instructor lists (`/api/v1/public/randomusers`) and course cards (`/api/v1/public/randomproducts`) in a zipped data structure.
-   - Optimized list scrolling using **LegendList** (`@legendapp/list/react-native`) with item recycling, key extraction, and React Memoization to prevent unnecessary re-renders.
-   - Features pulls-to-refresh, loading state indicators, and inline query search filtering.
-
-3. **WebView Syllabus Integration**:
-   - Renders a custom interactive syllabus environment inside `<WebView>`.
-   - Passes credentials and device parameters via custom WebView HTTP headers.
-   - **Bidirectional Native-Web Bridge**:
-     - *Web-to-Native*: WebView syllabus checkboxes transmit lesson completion status back to the native app, which dynamically updates a native progress tracker bar. A "Claim Certificate" action triggers a native Alert notification.
-     - *Native-to-Web*: Injecting JavaScript tips dynamically into the WebView's DOM using a native control panel button.
-
-4. **Native Device Features**:
-   - **Local Notifications** (`expo-notifications`): Registers push permissions and schedules a recurring 24-hour idle reminder notification. Triggers a milestone push notification immediately when the user has bookmarked 5 or more courses.
-   - **Offline Network Detection** (`@react-native-community/netinfo`): Renders a sticky warning banner when connection drops. Automatically falls back to localized storage caches (`AsyncStorage`) for course catalog data.
-   - **Live Camera / Photo Upload** (`expo-image-picker`): Allows users to change their profile picture by taking/uploading a photo.
+This project fulfills the requirements of the React Native Expo Developer Assignment.
 
 ---
 
-## 🏗️ Architecture & File Structure
-
-```
-lms/
-├── src/
-│   ├── app/                      # Expo Router File-based Navigation
-│   │   ├── (auth)/               # Authorization flow group (login, register)
-│   │   ├── (tabs)/               # Main core app tabs group
-│   │   │   ├── index.tsx         # Course Catalog List
-│   │   │   ├── bookmarks.tsx     # Bookmarked courses
-│   │   │   └── profile.tsx       # Profile screen & statistics
-│   │   ├── course/
-│   │   │   ├── [id].tsx          # Course Details view & Enroll CTA
-│   │   │   └── view.tsx          # WebView lesson syllabus viewer
-│   │   ├── _layout.tsx           # Global routing navigation stack
-│   │   └── index.tsx             # Auth controller & session initialization
-│   ├── components/
-│   │   └── CourseCard.tsx        # Memoized course card rendering component
-│   ├── services/
-│   │   ├── apiClient.ts          # Fetch wrapper with timeouts, retries, and token-refresh
-│   │   └── notificationService.ts# Local push notification permission & scheduling helper
-│   ├── store/
-│   │   ├── useAuthStore.ts       # Zustand authorization store
-│   │   └── useCourseStore.ts     # Zustand course data, bookmarks, and enrollment store
-│   ├── hooks/
-│   │   └── useNetwork.ts         # Custom offline status hook
-│   ├── utils/
-│   │   └── courseTemplate.ts     # WebView local syllabus HTML & JS bridge template
-│   └── global.css                # Tailwind global imports
-├── tailwind.config.js            # Tailwind compiler configuration
-├── metro.config.js               # Metro bundler hook for NativeWind CSS
-├── babel.config.js               # Babel compiler preset hook for NativeWind
-└── package.json
-```
-
----
-
-## ⚙️ Setup & Installation Instructions
+## 🚀 Setup & Installation Instructions
 
 ### Prerequisites
-Make sure you have Node.js (v18+) and npm installed.
+* **Node.js** (v18 or higher)
+* **npm** (comes packaged with Node.js)
+* **Expo Go app** on your physical device (iOS/Android) or configured local simulators.
 
-### 1. Install Dependencies
-Clone the repository and install all packages:
-```bash
-npm install
-```
-
-### 2. Run the Development Server
-Start the local Expo development server:
-```bash
-npx expo start
-```
-
-### 3. Open on Emulator / Device
-In the terminal output, select one of the following:
-- Press `a` to open in an **Android Emulator** (requires Android Studio).
-- Press `i` to open in an **iOS Simulator** (requires macOS and Xcode).
-- Scan the QR code using the **Expo Go** application on your physical iOS or Android device.
-
----
-
-## ⚡ Key Architectural Decisions
-
-- **Zustand over Redux**: Selected Zustand due to its lightweight nature, simple hook-based integration, and zero boilerplate, leading to much cleaner code structure.
-- **Native Fetch Client**: Rather than importing Axios, we developed a highly robust custom `fetch` wrapper in `apiClient.ts` that includes automatic timeout handling, request interceptor token attachment, request retry logic on 5xx status codes, and recursive async token refresh handlers.
-- **LegendList for Infinite Lists**: Traditional `FlatList` has memory performance problems with complex card layouts. We integrated `@legendapp/list` which recycles views offscreen, drastically reducing rendering delays and layout lag.
-- **Dynamic HTML strings for WebView**: Loading local HTML files can fail on Android depending on resource bundling paths. Loading the HTML template as a dynamically formatted string is completely bulletproof, loads instantaneously, and lets us interpolate course variables before load.
+### Installation Steps
+1. Clone the repository and navigate to the project directory:
+   ```bash
+   cd lms
+   ```
+2. Install the application dependencies:
+   ```bash
+   npm install
+   ```
+3. Run the development server with a cleared cache to compile the latest code:
+   ```bash
+   npx expo start -c
+   ```
+4. Scan the QR code using your phone's camera (iOS) or the Expo Go App (Android). Alternatively, press `a` for Android Emulator or `i` for iOS Simulator.
 
 ---
 
-## ⚠️ Known Limitations
-- The API backend (`api.freeapi.app`) is a sandbox hub and may experience rate-limits or temporary offline status. We have implemented local cache overrides in the course and auth stores so that the application remains fully browsable and interactive in offline cache mode.
-- Local push notifications scheduler on Android requires configuring native channel importance, which has been handled in `notificationService.ts`.
+## 🔑 Environment Variables Needed
+No external `.env` file is required for basic operations because:
+* **API Base URL**: Hardcoded to `https://api.freeapi.app/api/v1` inside `src/services/apiClient.ts` as per the assignment specifications.
+* **Expo EAS Project ID**: Stored in `app.json` (`f3a02a6c-32e5-4db8-9ac0-f282d4cfefc2`) and `eas.json` for cloud builds.
+
+---
+
+## 🏗️ Key Architectural Decisions
+
+1. **Zustand for State Management**:
+   We chose Zustand for global state management because it provides lightweight, boilerplate-free state containers, making it easier to separate business logic from the UI components.
+
+2. **LegendList for Render Optimization**:
+   Instead of `FlatList`, we integrated `@legendapp/list` (LegendList) for the course catalog list and bookmark views. It recycles components off-screen, drastically reducing rendering load and optimizing frame-rates for complex nested card structures.
+
+3. **SecureStore & AsyncStorage Persistence**:
+   - **Expo SecureStore** is used exclusively for sensitive user tokens (`accessToken`, `refreshToken`) to prevent access token leaks.
+   - **AsyncStorage** is used for caching non-sensitive course items and user bookmarks to enable seamless offline capabilities.
+
+4. **Bidirectional WebView Bridge**:
+   Syllabus course details are loaded inside a custom `<WebView>` element. We inject custom parameters via headers and communicate state via `postMessage`.
+   - **Web-to-Native**: User checkboxes on the web page send status events to update the native progress bar.
+   - **Native-to-Web**: A control panel button on the native page injects JavaScript commands directly into the WebView DOM.
+
+5. **API Client with Offline Fallback Mode**:
+   Due to frequent rate limits and temporary downtime of the public Sandbox API (`api.freeapi.app`), the `apiClient.ts` custom wrapper handles timeouts and retries. If a network failure occurs, the Zustand stores automatically trigger **Offline Mock Mode**, allowing seamless registration, login, and course browsing using cached datasets.
+
+---
+
+## ⚠️ Known Issues / Limitations
+1. **FreeAPI Availability**: The Sandbox API is subject to rate-limiting or server outages. When offline or timed out, the app automatically transitions to its offline mock state.
+2. **Push Notifications in Emulators**: Android emulators or iOS simulators may not support remote notifications without correct Google Play Services configurations. We recommend using a physical device with Expo Go to verify permissions and local notification schedulers.
+
+---
+
+## 📦 APK Build Instructions
+The project is configured for cloud builds using Expo Application Services (EAS). To trigger a preview/development APK build for testing:
+1. Initialize/Login to EAS:
+   ```bash
+   npx eas login
+   ```
+2. Trigger the preview build:
+   ```bash
+   npx eas build --platform android --profile preview
+   ```
+This will output a downloadable `.apk` file that can be installed directly on Android devices.

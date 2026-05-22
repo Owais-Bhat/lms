@@ -25,7 +25,7 @@ export default function CourseDetailsScreen() {
   const isBookmarked = bookmarks.includes(id || '');
   const isEnrolled = enrolled.includes(id || '');
 
-  // Set the screen title & bookmark button dynamically
+  
   useLayoutEffect(() => {
     navigation.setOptions({
       title: course ? course.title : 'Course Details',
@@ -78,7 +78,7 @@ export default function CourseDetailsScreen() {
   return (
     <View className="flex-1 bg-slate-950">
       <ScrollView className="flex-1">
-        {/* Course Banner Image */}
+        
         <View className="h-60 bg-slate-800 relative">
           <Image
             source={course.thumbnail}
@@ -88,9 +88,9 @@ export default function CourseDetailsScreen() {
           <View className="absolute inset-0 bg-slate-950/20" />
         </View>
 
-        {/* Content Body */}
+        
         <View className="p-6">
-          {/* Category & Rating */}
+          
           <View className="flex-row items-center justify-between mb-4">
             <View className="bg-blue-600/20 px-3 py-1 rounded-full border border-blue-500/30">
               <Text className="text-blue-400 text-xs font-bold capitalize">
@@ -105,12 +105,12 @@ export default function CourseDetailsScreen() {
             </View>
           </View>
 
-          {/* Title */}
+          
           <Text className={`text-2xl font-black mb-4 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             {course.title}
           </Text>
 
-          {/* Instructor Block */}
+          
           <View className={`flex-row items-center border-y border-slate-900 py-4 mb-6`}>
             <Image
               source={course.instructor.avatar}
@@ -125,7 +125,7 @@ export default function CourseDetailsScreen() {
             </View>
           </View>
 
-          {/* Course Details / Description */}
+          
           <Text className={`text-sm font-bold uppercase tracking-wider mb-2 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
             About This Course
           </Text>
@@ -135,7 +135,7 @@ export default function CourseDetailsScreen() {
         </View>
       </ScrollView>
 
-      {/* Floating Bottom Bar: Enrollment & WebView triggers */}
+      
       <View className={`px-6 py-5 border-t flex-row items-center justify-between ${
         isDark ? 'bg-slate-900 border-slate-850' : 'bg-white border-slate-100'
       }`}>

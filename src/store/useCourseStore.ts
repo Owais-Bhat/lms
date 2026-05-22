@@ -114,7 +114,7 @@ export const useCourseStore = create<CourseState>((set, get) => ({
     }
 
     try {
-      // Fetch products (courses) and users (instructors) in parallel
+      
       const [productsData, usersData] = await Promise.all([
         apiClient.get<ProductsResponse>('/public/randomproducts?page=1&limit=25'),
         apiClient.get<UsersResponse>('/public/randomusers?page=1&limit=25'),
@@ -124,7 +124,7 @@ export const useCourseStore = create<CourseState>((set, get) => ({
         const rawProducts = productsData.data.data;
         const rawUsers = usersData.data.data;
 
-        // Zip them together: map each product to an instructor by index
+        
         const zippedCourses: Course[] = rawProducts.map((prod, index) => {
           const instructorUser = rawUsers[index % rawUsers.length];
           return {
@@ -145,7 +145,7 @@ export const useCourseStore = create<CourseState>((set, get) => ({
           };
         });
 
-        // Save to cache for offline availability
+        
         await AsyncStorage.setItem(COURSES_CACHE_KEY, JSON.stringify(zippedCourses));
 
         set({
@@ -157,7 +157,7 @@ export const useCourseStore = create<CourseState>((set, get) => ({
         throw new Error('Failed to retrieve catalog data from backend');
       }
     } catch (err: any) {
-      // Load from local cache if API fails
+      
       const cached = await AsyncStorage.getItem(COURSES_CACHE_KEY);
       if (cached) {
         set({
@@ -185,7 +185,7 @@ export const useCourseStore = create<CourseState>((set, get) => ({
     } else {
       updatedBookmarks = [...bookmarks, courseId];
       
-      // Trigger milestone notification when reaching 5 bookmarks
+      
       if (updatedBookmarks.length === 5) {
         setTimeout(async () => {
           await notificationService.showBookmarkMilestone(5);

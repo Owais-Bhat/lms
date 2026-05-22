@@ -14,6 +14,7 @@ export default function AppEntry() {
       await initialize();
       await initializeStore();
       await notificationService.scheduleIdleReminder();
+      await notificationService.registerForPushNotificationsAsync();
     };
     start();
   }, []);
@@ -35,5 +36,5 @@ export default function AppEntry() {
     return <Redirect href="/(tabs)" />;
   }
 
-  return <Redirect href="/(auth)/login" />;
+  return <Redirect href="/login" />;
 }

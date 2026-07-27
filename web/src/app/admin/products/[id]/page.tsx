@@ -1,26 +1,61 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Check, Plus, Trash2 } from "lucide-react";
+import { Check, Loader2, Plus, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import { Button } from "@/components/ui/Button";
-import { addOns, getProductBySlug, products } from "@/lib/data";
+import { addOns } from "@/lib/data";
+import { useProductsStore } from "@/store/products-store";
 
 const tabs = ["General", "Media", "Variants", "Add-ons", "Availability"] as const;
 
 export default function AdminProductEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const product = products.find((p) => p.id === id) ?? getProductBySlug(id);
+  const allProducts = useProductsStore((s) => s.products);
+  const fetchProducts = useProductsStore((s) => s.fetchProducts);
+  const updateProduct = useProductsStore((s) => s.updateProduct);
+  const loaded = useProductsStore((s) => s.loaded);
+  const product = allProducts.find((p) => p.id === id) ?? allProducts.find((p) => p.slug === id);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
   const [tab, setTab] = useState<(typeof tabs)[number]>("General");
   const [name, setName] = useState(product?.name ?? "");
   const [description, setDescription] = useState(product?.description ?? "");
   const [price, setPrice] = useState(product?.price.toString() ?? "");
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  if (!product) notFound();
+  useEffect(() => {
+    if (product) {
+      setName(product.name);
+      setDescription(product.description);
+      setPrice(product.price.toString());
+    }
+  }, [product]);
+
+  if (!product) {
+    if (!loaded) return null;
+    notFound();
+  }
+
+  async function handleSave() {
+    if (!product) return;
+    setSaving(true);
+    await updateProduct(product.id, {
+      name,
+      description,
+      price: parseFloat(price) || product.price,
+    });
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
@@ -171,14 +206,9 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ id:
         )}
       </div>
 
-      <Button
-        className="self-start"
-        onClick={() => {
-          setSaved(true);
-          setTimeout(() => setSaved(false), 2000);
-        }}
-      >
-        {saved ? "Saved!" : "Save Changes"}
+      <Button className="self-start gap-2" onClick={handleSave} disabled={saving}>
+        {saving && <Loader2 size={16} className="animate-spin" />}
+        {saving ? "Saving..." : saved ? "Saved!" : "Save Changes"}
       </Button>
     </div>
   );

@@ -108,19 +108,25 @@ export type AdminCustomer = {
   addresses: string[];
 };
 
-export const adminCustomers: AdminCustomer[] = customers.map((name, i) => ({
+export const adminCustomers: AdminCustomer[] = customers.map((name, i) => {
+  // Derived from adminOrders (not an independent formula) so the order
+  // count / lifetime value shown here always matches the customer's real
+  // order history list on the detail page.
+  const customerOrders = adminOrders.filter((o) => o.customer === name);
+  return {
   id: `CU${1000 + i}`,
   name,
   email: `${name.toLowerCase().replace(/\s+/g, ".")}@example.com`,
   phone: `+1 555 0${100 + i * 3}`,
   joined: `2025-${String(1 + (i % 12)).padStart(2, "0")}-14`,
-  orders: 2 + (i % 12),
-  ltv: 80 + i * 23.5,
+  orders: customerOrders.length,
+  ltv: customerOrders.reduce((sum, o) => sum + o.total, 0),
   loyaltyPoints: 40 + i * 35,
   tags: i % 3 === 0 ? ["VIP"] : i % 4 === 0 ? ["At risk"] : [],
   blocked: i === 8,
   addresses: [`${100 + i} Confection Lane, ${zones[i % zones.length]}`],
-}));
+  };
+});
 
 export const coupons = [
   { code: "SWEET10", type: "Percent" as const, value: 10, minOrder: 20, uses: 234, limit: 500, expiry: "2026-08-31", firstOrderOnly: false, active: true },

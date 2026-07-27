@@ -103,3 +103,32 @@ export const supabaseDb = {
     }
   },
 };
+
+export const supabaseStorage = {
+  // Uploads a file to the public "product-images" bucket and returns its
+  // public URL, or null if the upload failed (e.g. bucket not yet created —
+  // see the storage section of supabase_schema.sql).
+  async uploadProductImage(file: File): Promise<string | null> {
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `products/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/product-images/${path}`, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": file.type || "image/jpeg",
+        },
+        body: file,
+      });
+      if (!res.ok) {
+        console.warn(`Supabase Storage upload returned status ${res.status}`);
+        return null;
+      }
+      return `${SUPABASE_URL}/storage/v1/object/public/product-images/${path}`;
+    } catch (err) {
+      console.error("Supabase Storage upload error:", err);
+      return null;
+    }
+  },
+};

@@ -67,3 +67,19 @@ CREATE POLICY "Allow public read/write on orders" ON public.orders FOR ALL USING
 CREATE POLICY "Allow public read/write on products" ON public.products FOR ALL USING (true);
 CREATE POLICY "Allow public read/write on theme_config" ON public.theme_config FOR ALL USING (true);
 CREATE POLICY "Allow public read/write on admin_users" ON public.admin_users FOR ALL USING (true);
+
+-- =======================================================
+-- 5. Storage bucket for product image uploads (admin panel)
+-- =======================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('product-images', 'product-images', true)
+ON CONFLICT (id) DO NOTHING;
+
+CREATE POLICY "Public read product-images" ON storage.objects
+  FOR SELECT USING (bucket_id = 'product-images');
+CREATE POLICY "Public upload product-images" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'product-images');
+CREATE POLICY "Public update product-images" ON storage.objects
+  FOR UPDATE USING (bucket_id = 'product-images');
+CREATE POLICY "Public delete product-images" ON storage.objects
+  FOR DELETE USING (bucket_id = 'product-images');

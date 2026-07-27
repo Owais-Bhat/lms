@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Plus, Search, Trash2, X, Check, Database } from "lucide-react";
+import { Plus, Search, Trash2, X, Check, ImageUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { categories as initialCategories, type Product } from "@/lib/data";
 import { useProductsStore } from "@/store/products-store";
+import { supabaseStorage } from "@/lib/supabase";
+
+const DEFAULT_IMAGE = "/images/products/wedding-tiered-elegance.jpg";
 
 export default function AdminProductsPage() {
   const [tab, setTab] = useState<"products" | "categories">("products");
@@ -17,6 +20,7 @@ export default function AdminProductsPage() {
   const hiddenIds = useProductsStore((s) => s.hiddenIds);
   const fetchProducts = useProductsStore((s) => s.fetchProducts);
   const addProduct = useProductsStore((s) => s.addProduct);
+  const updateProduct = useProductsStore((s) => s.updateProduct);
   const setActive = useProductsStore((s) => s.setActive);
   const deleteProduct = useProductsStore((s) => s.deleteProduct);
 
@@ -25,7 +29,13 @@ export default function AdminProductsPage() {
   const [newCategory, setNewCategory] = useState("birthday");
   const [newPrice, setNewPrice] = useState("32");
   const [newDesc, setNewDesc] = useState("");
+  const [newImageFile, setNewImageFile] = useState<File | null>(null);
+  const [newImagePreview, setNewImagePreview] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [rowUploadingId, setRowUploadingId] = useState<string | null>(null);
+  const rowFileInputRef = useRef<HTMLInputElement | null>(null);
+  const rowUploadTargetId = useRef<string | null>(null);
 
   useEffect(() => {
     fetchProducts();
@@ -33,9 +43,31 @@ export default function AdminProductsPage() {
 
   const filtered = productList.filter((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()));
 
+  function handleImageFileSelected(file: File | null) {
+    setNewImageFile(file);
+    setUploadError(null);
+    if (file) {
+      setNewImagePreview(URL.createObjectURL(file));
+    } else {
+      setNewImagePreview(null);
+    }
+  }
+
   async function handleAddProduct(e: React.FormEvent) {
     e.preventDefault();
     setSyncing(true);
+    setUploadError(null);
+
+    let image = DEFAULT_IMAGE;
+    if (newImageFile) {
+      const uploadedUrl = await supabaseStorage.uploadProductImage(newImageFile);
+      if (uploadedUrl) {
+        image = uploadedUrl;
+      } else {
+        setUploadError("Image upload failed — check that the product-images storage bucket exists (see supabase_schema.sql). Product will be saved with a placeholder image.");
+      }
+    }
+
     const createdProduct: Product = {
       id: `p-${Date.now()}`,
       slug: newName.toLowerCase().replace(/\s+/g, "-"),
@@ -53,7 +85,7 @@ export default function AdminProductsPage() {
         { label: "1.0kg", priceDelta: 12 },
       ],
       illustration: "layer-drip",
-      image: "/images/products/wedding-tiered-elegance.jpg",
+      image,
     };
 
     await addProduct(createdProduct);
@@ -61,6 +93,8 @@ export default function AdminProductsPage() {
     setShowAddModal(false);
     setNewName("");
     setNewDesc("");
+    setNewImageFile(null);
+    setNewImagePreview(null);
     setSyncing(false);
   }
 
@@ -68,8 +102,37 @@ export default function AdminProductsPage() {
     await deleteProduct(id);
   }
 
+  function triggerRowImageUpload(productId: string) {
+    rowUploadTargetId.current = productId;
+    rowFileInputRef.current?.click();
+  }
+
+  async function handleRowFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    const productId = rowUploadTargetId.current;
+    e.target.value = "";
+    if (!file || !productId) return;
+
+    setRowUploadingId(productId);
+    const uploadedUrl = await supabaseStorage.uploadProductImage(file);
+    if (uploadedUrl) {
+      await updateProduct(productId, { image: uploadedUrl });
+    } else {
+      setUploadError("Image upload failed — check that the product-images storage bucket exists (see supabase_schema.sql).");
+    }
+    setRowUploadingId(null);
+  }
+
   return (
     <div className="flex flex-col gap-6">
+      <input
+        ref={rowFileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleRowFileChange}
+      />
+
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="font-serif text-3xl text-ink mb-1">Products & Categories</h1>
@@ -79,6 +142,12 @@ export default function AdminProductsPage() {
           <Plus size={16} /> Add Product
         </Button>
       </div>
+
+      {uploadError && (
+        <div className="neu-inset rounded-2xl p-3 text-xs font-semibold text-rose-700 bg-rose-50/50">
+          {uploadError}
+        </div>
+      )}
 
       <div className="neu-inset rounded-full p-1 flex gap-1 w-fit">
         {(["products", "categories"] as const).map((t) => (
@@ -125,9 +194,21 @@ export default function AdminProductsPage() {
                   <tr key={p.id} className="border-b border-ink/5 last:border-0 hover:bg-cocoa/5">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="neu-inset rounded-xl w-10 h-10 relative overflow-hidden shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => triggerRowImageUpload(p.id)}
+                          title="Change image"
+                          className="group neu-inset rounded-xl w-10 h-10 relative overflow-hidden shrink-0"
+                        >
                           <Image src={p.image} alt={p.name} fill sizes="40px" className="object-cover" />
-                        </div>
+                          <span className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center transition-colors">
+                            {rowUploadingId === p.id ? (
+                              <Loader2 size={14} className="text-white animate-spin" />
+                            ) : (
+                              <ImageUp size={14} className="text-white opacity-0 group-hover:opacity-100" />
+                            )}
+                          </span>
+                        </button>
                         <span className="font-semibold text-ink">{p.name}</span>
                       </div>
                     </td>
@@ -254,8 +335,33 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              <Button type="submit" size="md" className="w-full justify-center gap-2">
-                <Check size={16} /> Save & Publish Product
+              <div>
+                <label className="block text-xs font-bold text-cocoa uppercase mb-1">Product Image</label>
+                <label className="neu-inset rounded-2xl p-3 flex items-center gap-3 cursor-pointer">
+                  <div className="w-14 h-14 rounded-xl overflow-hidden relative shrink-0 neu-raised-sm">
+                    {newImagePreview ? (
+                      <Image src={newImagePreview} alt="Preview" fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-ink-soft">
+                        <ImageUp size={18} />
+                      </div>
+                    )}
+                  </div>
+                  <span className="text-xs font-semibold text-ink-soft flex-1">
+                    {newImageFile ? newImageFile.name : "Click to upload a photo (optional)"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => handleImageFileSelected(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+              </div>
+
+              <Button type="submit" size="md" className="w-full justify-center gap-2" disabled={syncing}>
+                {syncing ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />}
+                {syncing ? "Saving..." : "Save & Publish Product"}
               </Button>
             </form>
           </div>

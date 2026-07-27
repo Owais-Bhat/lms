@@ -3,9 +3,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
-import { CreditCard, Home, Lock, MapPin, Store, Wallet } from "lucide-react";
+import { CreditCard, Home, Lock, MapPin, Store, User, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useCartStore, cartSubtotal } from "@/store/cart-store";
+import { useOrderStore } from "@/store/order-store";
 
 const savedAddresses = [
   { id: "a1", label: "Home", line: "221B Baker Street, Confection Lane" },
@@ -25,6 +26,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const lines = useCartStore((s) => s.lines);
   const clear = useCartStore((s) => s.clear);
+  const createOrder = useOrderStore((s) => s.createOrder);
   const [mounted, setMounted] = useState(false);
 
   const [method, setMethod] = useState<"delivery" | "pickup">("delivery");
@@ -33,6 +35,9 @@ export default function CheckoutPage() {
   const [instructions, setInstructions] = useState("");
   const [agreed, setAgreed] = useState(false);
   const [placing, setPlacing] = useState(false);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => setMounted(true), []);
 
@@ -41,16 +46,32 @@ export default function CheckoutPage() {
   const tax = subtotal * TAX_RATE;
   const total = subtotal + delivery + tax;
 
-  const canPlace = mounted && lines.length > 0 && agreed;
+  const canPlace = mounted && lines.length > 0 && agreed && name.trim() !== "" && phone.trim() !== "";
 
-  function placeOrder() {
+  async function placeOrder() {
     if (!canPlace) return;
     setPlacing(true);
-    const orderId = `BS${Math.floor(100000 + Math.random() * 900000)}`;
-    setTimeout(() => {
-      clear();
-      router.push(`/checkout/confirmation?order=${orderId}`);
-    }, 700);
+
+    const selectedAddress = savedAddresses.find((a) => a.id === addressId);
+    const paymentLabel = paymentMethods.find((p) => p.id === payment)?.label ?? "Card";
+
+    const created = await createOrder({
+      customer: {
+        name,
+        email,
+        phone,
+        address: method === "delivery" ? (selectedAddress?.line ?? "") : "Store Pickup",
+        notes: instructions,
+      },
+      items: [...lines],
+      subtotal,
+      deliveryFee: delivery,
+      total,
+      paymentMethod: paymentLabel,
+    });
+
+    clear();
+    router.push(`/checkout/confirmation?order=${encodeURIComponent(created.orderNumber)}`);
   }
 
   const items = useMemo(() => lines, [lines]);
@@ -61,6 +82,37 @@ export default function CheckoutPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8">
         <div className="flex flex-col gap-6">
+          <div className="neu-raised rounded-3xl p-6">
+            <div className="text-sm font-bold text-ink mb-4 flex items-center gap-2">
+              <User size={14} /> Contact Details
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Full Name"
+                className="neu-inset rounded-2xl px-4 py-3 text-sm outline-none placeholder:text-ink-soft"
+              />
+              <input
+                type="tel"
+                required
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="Phone Number"
+                className="neu-inset rounded-2xl px-4 py-3 text-sm outline-none placeholder:text-ink-soft"
+              />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email (optional)"
+                className="neu-inset rounded-2xl px-4 py-3 text-sm outline-none placeholder:text-ink-soft sm:col-span-2"
+              />
+            </div>
+          </div>
+
           <div className="neu-raised rounded-3xl p-6">
             <div className="text-sm font-bold text-ink mb-4">Delivery Method</div>
             <div className="neu-inset rounded-full p-1 flex gap-1 w-fit">

@@ -32,7 +32,7 @@ export function ConfirmationClient() {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
-        <LinkButton href={`/track-order?order=${order}`} variant="ghost">
+        <LinkButton href={`/track-order?order=${encodeURIComponent(order)}`} variant="ghost">
           Track Order
         </LinkButton>
         <LinkButton href="/shop">Continue Shopping</LinkButton>

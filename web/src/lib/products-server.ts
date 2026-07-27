@@ -53,5 +53,5 @@ export async function getProductBySlugServer(slug: string): Promise<Product | nu
     // fall through to the static seed below
   }
 
-  return seeded;
+  return seeded ?? null;
 }

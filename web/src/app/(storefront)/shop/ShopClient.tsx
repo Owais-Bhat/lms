@@ -58,7 +58,7 @@ export function ShopClient() {
       default:
         return [...list].sort((a, b) => b.reviewCount - a.reviewCount);
     }
-  }, [category, dietary, maxPrice, sort, query]);
+  }, [products, category, dietary, maxPrice, sort, query]);
 
   const activeChips = [
     category && { key: "category", label: categories.find((c) => c.slug === category)?.name ?? category },

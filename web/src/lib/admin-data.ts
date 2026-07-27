@@ -79,7 +79,13 @@ export const adminOrders: AdminOrder[] = Array.from({ length: 24 }).map((_, i) =
     rider: status === "Out for Delivery" || status === "Delivered" ? riders[i % riders.length] : undefined,
     address: `${100 + i} Confection Lane, ${zone}`,
     zone,
-    placedAt: `2026-07-${String(18 + (i % 8)).padStart(2, "0")} ${9 + (i % 10)}:${i % 2 === 0 ? "00" : "30"} AM`,
+    placedAt: (() => {
+      const hour24 = 9 + (i % 10); // 9..18
+      const period = hour24 >= 12 ? "PM" : "AM";
+      const hour12 = hour24 > 12 ? hour24 - 12 : hour24;
+      const minutes = i % 2 === 0 ? "00" : "30";
+      return `2026-07-${String(18 + (i % 8)).padStart(2, "0")} ${hour12}:${minutes} ${period}`;
+    })(),
     auditTrail: [
       { at: `2026-07-${String(18 + (i % 8)).padStart(2, "0")} 09:00`, event: "Order placed" },
       { at: `2026-07-${String(18 + (i % 8)).padStart(2, "0")} 09:05`, event: "Payment confirmed" },

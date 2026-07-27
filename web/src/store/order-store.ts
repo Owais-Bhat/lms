@@ -76,7 +76,12 @@ export const useOrderStore = create<OrderState>()(
 
       fetchOrdersFromSupabase: async () => {
         const fetched = await supabaseDb.select<any>("orders", "*");
-        if (fetched && Array.isArray(fetched) && fetched.length > 0) {
+        // `fetched` is null only when the request itself failed (e.g. table
+        // missing, network error) — in that case keep whatever's already in
+        // the store as a fallback. An empty array is a valid, real result
+        // (zero orders) and must replace stale/cached local state, not be
+        // ignored — otherwise deleted orders would appear to linger forever.
+        if (fetched && Array.isArray(fetched)) {
           const formatted: Order[] = fetched.map((row) => ({
             id: row.id,
             orderNumber: row.order_number,

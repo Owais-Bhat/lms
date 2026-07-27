@@ -5,18 +5,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { Plus, Search, Trash2, X, Check, Database } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { categories as initialCategories, products as initialProducts, type Product } from "@/lib/data";
-import { supabaseDb } from "@/lib/supabase";
+import { categories as initialCategories, type Product } from "@/lib/data";
+import { useProductsStore } from "@/store/products-store";
 
 export default function AdminProductsPage() {
   const [tab, setTab] = useState<"products" | "categories">("products");
   const [query, setQuery] = useState("");
-  const [productList, setProductList] = useState<Product[]>(initialProducts);
   const [categoryList, setCategoryList] = useState(initialCategories);
 
-  const [active, setActive] = useState<Record<string, boolean>>(
-    Object.fromEntries(initialProducts.map((p) => [p.id, true]))
-  );
+  const productList = useProductsStore((s) => s.products);
+  const hiddenIds = useProductsStore((s) => s.hiddenIds);
+  const fetchProducts = useProductsStore((s) => s.fetchProducts);
+  const addProduct = useProductsStore((s) => s.addProduct);
+  const setActive = useProductsStore((s) => s.setActive);
+  const deleteProduct = useProductsStore((s) => s.deleteProduct);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [newName, setNewName] = useState("");
@@ -26,31 +28,8 @@ export default function AdminProductsPage() {
   const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
-    fetchProductsFromSupabase();
-  }, []);
-
-  async function fetchProductsFromSupabase() {
-    const fetched = await supabaseDb.select<any>("products", "*");
-    if (fetched && Array.isArray(fetched) && fetched.length > 0) {
-      const formatted: Product[] = fetched.map((row) => ({
-        id: row.id,
-        slug: row.slug,
-        name: row.name,
-        category: row.category,
-        description: row.description,
-        flavor: row.flavor || "Vanilla",
-        price: Number(row.price),
-        rating: Number(row.rating || 5),
-        reviewCount: Number(row.review_count || 1),
-        eggless: Boolean(row.eggless),
-        glutenFree: Boolean(row.gluten_free),
-        weights: typeof row.weights === "string" ? JSON.parse(row.weights) : row.weights || [],
-        illustration: row.illustration || "layer-drip",
-        image: row.image || "/images/products/wedding-tiered-elegance.jpg",
-      }));
-      setProductList(formatted);
-    }
-  }
+    fetchProducts();
+  }, [fetchProducts]);
 
   const filtered = productList.filter((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()));
 
@@ -77,27 +56,8 @@ export default function AdminProductsPage() {
       image: "/images/products/wedding-tiered-elegance.jpg",
     };
 
-    // Insert into Supabase products table
-    await supabaseDb.insert("products", {
-      id: createdProduct.id,
-      slug: createdProduct.slug,
-      name: createdProduct.name,
-      category: createdProduct.category,
-      description: createdProduct.description,
-      flavor: createdProduct.flavor,
-      price: createdProduct.price,
-      rating: createdProduct.rating,
-      review_count: createdProduct.reviewCount,
-      eggless: createdProduct.eggless,
-      gluten_free: createdProduct.glutenFree,
-      weights: createdProduct.weights,
-      illustration: createdProduct.illustration,
-      image: createdProduct.image,
-      active: true,
-    });
+    await addProduct(createdProduct);
 
-    setProductList([createdProduct, ...productList]);
-    setActive((prev) => ({ ...prev, [createdProduct.id]: true }));
     setShowAddModal(false);
     setNewName("");
     setNewDesc("");
@@ -105,8 +65,7 @@ export default function AdminProductsPage() {
   }
 
   async function handleDeleteProduct(id: string) {
-    await supabaseDb.delete("products", "id", id);
-    setProductList(productList.filter((p) => p.id !== id));
+    await deleteProduct(id);
   }
 
   return (
@@ -181,9 +140,9 @@ export default function AdminProductsPage() {
                     </td>
                     <td className="p-4">
                       <button
-                        onClick={() => setActive((prev) => ({ ...prev, [p.id]: !prev[p.id] }))}
+                        onClick={() => setActive(p.id, !!hiddenIds[p.id])}
                         className={
-                          active[p.id]
+                          !hiddenIds[p.id]
                             ? "w-10 h-5 rounded-full neu-inset relative bg-cocoa/20"
                             : "w-10 h-5 rounded-full neu-raised-sm relative bg-gray-200"
                         }
@@ -191,7 +150,7 @@ export default function AdminProductsPage() {
                         <span
                           className={
                             "absolute top-0.5 w-4 h-4 rounded-full bg-cocoa transition-all " +
-                            (active[p.id] ? "left-5" : "left-0.5")
+                            (!hiddenIds[p.id] ? "left-5" : "left-0.5")
                           }
                         />
                       </button>

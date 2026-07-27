@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Heart, MapPin, Star, Truck } from "lucide-react";
@@ -11,6 +11,7 @@ import { ProductImage } from "@/components/ProductImage";
 import { Button } from "@/components/ui/Button";
 import { ProductCard } from "@/components/ProductCard";
 import { useCartStore, useWishlistStore } from "@/store/cart-store";
+import { useProductsStore } from "@/store/products-store";
 
 const tabs = [
   "Description",
@@ -27,8 +28,17 @@ const timeSlots = [
   { id: "midnight", label: "Midnight Delivery", surcharge: 5 },
 ];
 
-export function ProductDetailClient({ product }: { product: Product }) {
+export function ProductDetailClient({ product: initialProduct }: { product: Product }) {
   const router = useRouter();
+  const fetchProducts = useProductsStore((s) => s.fetchProducts);
+  const liveProduct = useProductsStore((s) =>
+    s.products.find((p) => p.slug === initialProduct.slug)
+  );
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+  const product = liveProduct ?? initialProduct;
+
   const addLine = useCartStore((s) => s.addLine);
   const wishlisted = useWishlistStore((s) => s.has(product.id));
   const toggleWishlist = useWishlistStore((s) => s.toggle);

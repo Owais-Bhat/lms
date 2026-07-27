@@ -1,16 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { products } from "@/lib/data";
+import { useEffect, useMemo, useState } from "react";
 import { ProductCard } from "@/components/ProductCard";
 import { LinkButton } from "@/components/ui/Button";
 import { useWishlistStore } from "@/store/cart-store";
+import { useProductsStore } from "@/store/products-store";
 import CakeIllustration from "@/components/CakeIllustration";
 
 export default function WishlistPage() {
   const [mounted, setMounted] = useState(false);
   const ids = useWishlistStore((s) => s.ids);
-  useEffect(() => setMounted(true), []);
+  const fetchProducts = useProductsStore((s) => s.fetchProducts);
+  const allProducts = useProductsStore((s) => s.products);
+  const hiddenIds = useProductsStore((s) => s.hiddenIds);
+  useEffect(() => {
+    setMounted(true);
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const products = useMemo(
+    () => allProducts.filter((p) => !hiddenIds[p.id]),
+    [allProducts, hiddenIds]
+  );
 
   const items = mounted ? products.filter((p) => ids.includes(p.id)) : [];
 

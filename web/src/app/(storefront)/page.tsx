@@ -20,9 +20,9 @@ import {
 import { Button, LinkButton } from "@/components/ui/Button";
 import { IconBubble } from "@/components/ui/IconBubble";
 import { SectionHeading } from "@/components/SectionHeading";
-import { ProductCard } from "@/components/ProductCard";
-import { categories, products, testimonials } from "@/lib/data";
+import { categories, testimonials } from "@/lib/data";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { FeaturedProducts } from "@/components/FeaturedProducts";
 
 const categoryIcons: Record<string, typeof Cake> = {
   cake: Cake,
@@ -34,8 +34,6 @@ const categoryIcons: Record<string, typeof Cake> = {
   leaf: Leaf,
   "wheat-off": Wheat,
 };
-
-const bestsellers = products.slice(0, 4);
 
 export default function HomePage() {
   return (
@@ -187,11 +185,7 @@ export default function HomePage() {
             </LinkButton>
           }
         />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {bestsellers.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
+        <FeaturedProducts count={4} />
       </section>
 
       {/* How it works */}

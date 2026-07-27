@@ -29,6 +29,26 @@ export const supabaseDb = {
     }
   },
 
+  // Insert-or-update Query (matches on the given conflict column, default "id")
+  async upsert<T>(table: string, data: Record<string, any>, conflictColumn = "id"): Promise<T | null> {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?on_conflict=${conflictColumn}`, {
+        method: "POST",
+        headers: { ...headers, Prefer: "resolution=merge-duplicates,return=representation" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        console.warn(`Supabase UPSERT on ${table} returned status ${res.status}`);
+        return null;
+      }
+      const upserted = await res.json();
+      return Array.isArray(upserted) ? upserted[0] : upserted;
+    } catch (err) {
+      console.error(`Supabase UPSERT error on ${table}:`, err);
+      return null;
+    }
+  },
+
   // Insert Query
   async insert<T>(table: string, data: Record<string, any>): Promise<T | null> {
     try {

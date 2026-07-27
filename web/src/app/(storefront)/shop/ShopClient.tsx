@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { LayoutGrid, List, SlidersHorizontal, X } from "lucide-react";
 import clsx from "clsx";
-import { categories, products } from "@/lib/data";
+import { categories } from "@/lib/data";
 import { ProductCard } from "@/components/ProductCard";
 import { Button } from "@/components/ui/Button";
+import { useProductsStore } from "@/store/products-store";
 
 type SortKey = "popularity" | "price-asc" | "price-desc" | "rating";
 
@@ -25,6 +26,18 @@ export function ShopClient() {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [query] = useState(initialQuery);
+
+  const fetchProducts = useProductsStore((s) => s.fetchProducts);
+  const allProducts = useProductsStore((s) => s.products);
+  const hiddenIds = useProductsStore((s) => s.hiddenIds);
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const products = useMemo(
+    () => allProducts.filter((p) => !hiddenIds[p.id]),
+    [allProducts, hiddenIds]
+  );
 
   const filtered = useMemo(() => {
     let list = products.filter((p) => p.price <= maxPrice);

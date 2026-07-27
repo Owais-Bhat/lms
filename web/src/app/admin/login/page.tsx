@@ -15,20 +15,18 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    setTimeout(() => {
-      const success = login(username, password);
-      if (success) {
-        router.push("/admin");
-      } else {
-        setError("Invalid credentials. Please use username 'admin' and password 'bakestudio123'.");
-        setLoading(false);
-      }
-    }, 400);
+    const success = await login(username, password);
+    if (success) {
+      router.push("/admin");
+    } else {
+      setError("Invalid credentials. Please use username 'admin' and password 'bakestudio123'.");
+      setLoading(false);
+    }
   }
 
   return (

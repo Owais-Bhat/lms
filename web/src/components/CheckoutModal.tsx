@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useCartStore, cartSubtotal } from "@/store/cart-store";
 import { useOrderStore } from "@/store/order-store";
 import { Button } from "@/components/ui/Button";
-import { CheckCircle2, CreditCard, MapPin, Phone, User, X, Sparkles } from "lucide-react";
+import { CheckCircle2, CreditCard, Loader2, MapPin, Phone, User, X, Sparkles } from "lucide-react";
 
 type CheckoutModalProps = {
   isOpen: boolean;
@@ -23,6 +23,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const [paymentMethod, setPaymentMethod] = useState("UPI / Online Payment");
 
   const [orderSuccess, setOrderSuccess] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
@@ -30,10 +31,11 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
   const deliveryFee = subtotal > 50 ? 0 : 5;
   const total = subtotal + deliveryFee;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitting(true);
 
-    const created = createOrder({
+    const created = await createOrder({
       customer: { name, email, phone, address, notes },
       items: [...lines],
       subtotal,
@@ -43,6 +45,7 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
     });
 
     clear();
+    setSubmitting(false);
     setOrderSuccess(created.orderNumber);
   }
 
@@ -187,8 +190,9 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
               </div>
             </div>
 
-            <Button type="submit" size="lg" className="w-full justify-center gap-2">
-              <CreditCard size={18} /> Place Order (${total.toFixed(2)})
+            <Button type="submit" size="lg" className="w-full justify-center gap-2" disabled={submitting}>
+              {submitting ? <Loader2 size={18} className="animate-spin" /> : <CreditCard size={18} />}
+              {submitting ? "Placing Order..." : `Place Order ($${total.toFixed(2)})`}
             </Button>
           </form>
         )}

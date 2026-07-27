@@ -16,7 +16,7 @@ export default function AdminMarketingPage() {
   const [showModal, setShowModal] = useState(false);
   const [code, setCode] = useState("");
   const [value, setValue] = useState("15");
-  const [type, setType] = useState<"Percent" | "Fixed">("Percent");
+  const [type, setType] = useState<"Percent" | "Flat">("Percent");
 
   function handleCreateCoupon(e: React.FormEvent) {
     e.preventDefault();
@@ -28,6 +28,7 @@ export default function AdminMarketingPage() {
       uses: 0,
       limit: 100,
       expiry: "2026-12-31",
+      firstOrderOnly: false,
       active: true,
     };
     setCouponList([created, ...couponList]);
@@ -171,7 +172,7 @@ export default function AdminMarketingPage() {
                     className="neu-inset rounded-2xl p-3 text-xs text-ink outline-none w-full font-semibold bg-transparent"
                   >
                     <option value="Percent">Percentage (% OFF)</option>
-                    <option value="Fixed">Fixed Amount ($ OFF)</option>
+                    <option value="Flat">Fixed Amount ($ OFF)</option>
                   </select>
                 </div>
 

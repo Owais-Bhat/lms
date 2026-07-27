@@ -18,7 +18,7 @@ function rowToProduct(row: Record<string, any>): Product {
     eggless: Boolean(row.eggless),
     glutenFree: Boolean(row.gluten_free),
     weights: typeof row.weights === "string" ? JSON.parse(row.weights) : row.weights || [],
-    illustration: row.illustration || "layer-drip",
+    illustration: row.illustration || "tart",
     image: row.image || "/images/products/wedding-tiered-elegance.jpg",
   };
 }

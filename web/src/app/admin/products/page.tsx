@@ -84,7 +84,7 @@ export default function AdminProductsPage() {
         { label: "0.5kg", priceDelta: 0 },
         { label: "1.0kg", priceDelta: 12 },
       ],
-      illustration: "layer-drip",
+      illustration: "tart",
       image,
     };
 

@@ -53,7 +53,7 @@ const mockInitialOrders: Order[] = [
         productId: "p1",
         slug: "strawberry-delight",
         name: "Strawberry Delight Cake",
-        illustration: "layer-drip",
+        illustration: "slice-berry",
         image: "/images/products/strawberry-delight.jpg",
         weightLabel: "1.0kg",
         unitPrice: 35,

@@ -124,15 +124,15 @@ export const coupons = [
 ];
 
 export const banners = [
-  { id: "b1", title: "Summer Cake Sale", link: "/shop?category=birthday", live: true, start: "2026-07-01", end: "2026-08-31" },
-  { id: "b2", title: "Custom Wedding Cakes", link: "/custom-cake-builder", live: true, start: "2026-06-01", end: "2026-09-30" },
-  { id: "b3", title: "Corporate Gifting", link: "/corporate", live: false, start: "2026-08-01", end: "2026-09-15" },
+  { id: "b1", title: "Summer Cake Sale", subtitle: "20% off all birthday cakes through August", link: "/shop?category=birthday", live: true, active: true, start: "2026-07-01", end: "2026-08-31" },
+  { id: "b2", title: "Custom Wedding Cakes", subtitle: "Book a tasting session for your big day", link: "/custom-cake-builder", live: true, active: true, start: "2026-06-01", end: "2026-09-30" },
+  { id: "b3", title: "Corporate Gifting", subtitle: "Bulk orders with branded packaging", link: "/corporate", live: false, active: false, start: "2026-08-01", end: "2026-09-15" },
 ];
 
 export const campaigns = [
-  { id: "c1", name: "Abandoned Cart Recovery", channel: "Email", audience: "Cart abandoners (7d)", sent: 1240, opened: 512, clicked: 88, status: "Active" },
-  { id: "c2", name: "Birthday Month Reminder", channel: "SMS", audience: "Birthday this month", sent: 340, opened: 340, clicked: 61, status: "Active" },
-  { id: "c3", name: "Winback — 60 Days Inactive", channel: "Email", audience: "No order in 60 days", sent: 890, opened: 210, clicked: 34, status: "Scheduled" },
+  { id: "c1", name: "Abandoned Cart Recovery", channel: "Email", audience: "Cart abandoners (7d)", sent: 1240, opened: 512, clicked: 88, conversions: 34, status: "Active" },
+  { id: "c2", name: "Birthday Month Reminder", channel: "SMS", audience: "Birthday this month", sent: 340, opened: 340, clicked: 61, conversions: 22, status: "Active" },
+  { id: "c3", name: "Winback — 60 Days Inactive", channel: "Email", audience: "No order in 60 days", sent: 890, opened: 210, clicked: 34, conversions: 9, status: "Scheduled" },
 ];
 
 export const reviewsQueue = [
@@ -163,17 +163,17 @@ export const deliveryZones = [
 ];
 
 export const timeSlots = [
-  { id: "t1", label: "10am - 2pm", surcharge: 0, capacity: 40, booked: 22 },
-  { id: "t2", label: "2pm - 6pm", surcharge: 0, capacity: 40, booked: 35 },
-  { id: "t3", label: "Express (3 hrs)", surcharge: 3, capacity: 15, booked: 9 },
-  { id: "t4", label: "Midnight Delivery", surcharge: 5, capacity: 10, booked: 4 },
+  { id: "t1", slot: "10am - 2pm", label: "10am - 2pm", surcharge: 0, capacity: 40, booked: 22, active: true },
+  { id: "t2", slot: "2pm - 6pm", label: "2pm - 6pm", surcharge: 0, capacity: 40, booked: 35, active: true },
+  { id: "t3", slot: "Express (3 hrs)", label: "Express (3 hrs)", surcharge: 3, capacity: 15, booked: 9, active: true },
+  { id: "t4", slot: "Midnight Delivery", label: "Midnight Delivery", surcharge: 5, capacity: 10, booked: 10, active: false },
 ];
 
 export const ridersList = [
-  { id: "rd1", name: "Vikram S.", zone: "Downtown", deliveries: 340, rating: 4.9, status: "On Duty" },
-  { id: "rd2", name: "Ali H.", zone: "Riverside", deliveries: 290, rating: 4.8, status: "On Duty" },
-  { id: "rd3", name: "Tomás R.", zone: "Uptown", deliveries: 210, rating: 4.7, status: "Off Duty" },
-  { id: "rd4", name: "Priyanka D.", zone: "Suburbs North", deliveries: 175, rating: 4.9, status: "On Duty" },
+  { id: "rd1", name: "Vikram S.", zone: "Downtown", vehicle: "Bike", phone: "+91 98765 11001", deliveries: 340, deliveriesToday: 6, rating: 4.9, status: "Available" },
+  { id: "rd2", name: "Ali H.", zone: "Riverside", vehicle: "Scooter", phone: "+91 98765 11002", deliveries: 290, deliveriesToday: 4, rating: 4.8, status: "Available" },
+  { id: "rd3", name: "Tomás R.", zone: "Uptown", vehicle: "Bike", phone: "+91 98765 11003", deliveries: 210, deliveriesToday: 0, rating: 4.7, status: "Off Duty" },
+  { id: "rd4", name: "Priyanka D.", zone: "Suburbs North", vehicle: "Van", phone: "+91 98765 11004", deliveries: 175, deliveriesToday: 3, rating: 4.9, status: "Available" },
 ];
 
 export const transactions = Array.from({ length: 10 }).map((_, i) => ({
@@ -194,10 +194,10 @@ export const adminUsers = [
 ];
 
 export const auditLog = [
-  { at: "2026-07-27 09:12", user: "Meera Kapoor", action: "Updated order BS480037 status to Baking" },
-  { at: "2026-07-27 08:45", user: "Owais Bhat", action: "Created coupon SUMMER25" },
-  { at: "2026-07-26 17:20", user: "Divya Rao", action: "Published blog post 'Choosing the Right Cake for a Summer Wedding'" },
-  { at: "2026-07-26 14:02", user: "Liam Fischer", action: "Assigned rider Vikram S. to zone Downtown" },
+  { time: "2026-07-27 09:12", user: "Meera Kapoor", action: "Updated order BS480037 status to Baking" },
+  { time: "2026-07-27 08:45", user: "Owais Bhat", action: "Created coupon SUMMER25" },
+  { time: "2026-07-26 17:20", user: "Divya Rao", action: "Published blog post 'Choosing the Right Cake for a Summer Wedding'" },
+  { time: "2026-07-26 14:02", user: "Liam Fischer", action: "Assigned rider Vikram S. to zone Downtown" },
 ];
 
 export const kitchenQueue = adminOrders
@@ -235,7 +235,7 @@ export const topProducts = [
   { name: "Double Choc Chip Cookies", sold: 205, revenue: 574 },
 ];
 export const lowStock = [
-  { name: "Fondant (White) — 5kg", remaining: 2, unit: "kg" },
-  { name: "Edible Gold Leaf", remaining: 6, unit: "sheets" },
-  { name: "Red Velvet Mix", remaining: 4, unit: "kg" },
+  { name: "Fondant (White) — 5kg", current: 2, threshold: 5, unit: "kg" },
+  { name: "Edible Gold Leaf", current: 6, threshold: 10, unit: "sheets" },
+  { name: "Red Velvet Mix", current: 4, threshold: 8, unit: "kg" },
 ];

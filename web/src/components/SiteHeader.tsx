@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import clsx from "clsx";
+import Image from "next/image";
 import { LinkButton } from "@/components/ui/Button";
 import { useCartStore, cartCount } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/cart-store";
@@ -44,9 +45,15 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-base px-4 md:px-8 py-4 flex items-center justify-between gap-4 flex-wrap shadow-[0_4px_12px_rgba(60,42,34,0.06)]">
-      <Link href="/" className="flex items-center gap-3">
-        <div className="neu-raised-sm w-12 h-12 rounded-full flex items-center justify-center font-serif text-xl text-cocoa">
-          B
+      <Link href="/" className="flex items-center gap-2">
+        <div className="w-14 h-14 rounded-full overflow-hidden neu-raised-sm shrink-0">
+          <Image
+            src="/397933929_349910914162675_2573495290687325833_n.jpg"
+            alt="Bakestudio Logo"
+            width={56}
+            height={56}
+            className="object-cover w-full h-full"
+          />
         </div>
         <div>
           <div className="font-serif text-xl leading-none text-ink">Bakestudio</div>

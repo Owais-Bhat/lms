@@ -26,13 +26,13 @@ export default function AboutPage() {
             no shortcuts, and a little extra frosting on every slice.
           </p>
         </div>
-        <div className="neu-inset-lg rounded-full aspect-square max-w-xs mx-auto p-4 overflow-hidden relative">
+        <div className="rounded-full w-[280px] h-[280px] lg:w-[360px] lg:h-[360px] mx-auto overflow-hidden relative shrink-0" style={{boxShadow: '8px 8px 20px rgba(140,95,72,0.18), -8px -8px 20px rgba(255,255,255,0.85), 0 0 0 3px rgba(196,120,90,0.12)'}}>
           <Image
-            src="/images/products/about.jpg"
-            alt="Bakestudio kitchen"
+            src="/397933929_349910914162675_2573495290687325833_n.jpg"
+            alt="Bakestudio founder"
             fill
-            sizes="(max-width: 1024px) 60vw, 300px"
-            className="object-cover rounded-full"
+            sizes="360px"
+            className="object-cover"
           />
         </div>
       </div>

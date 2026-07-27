@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   Cake,
   CalendarCheck,
@@ -20,7 +21,6 @@ import { Button, LinkButton } from "@/components/ui/Button";
 import { IconBubble } from "@/components/ui/IconBubble";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ProductCard } from "@/components/ProductCard";
-import Image from "next/image";
 import { categories, products, testimonials } from "@/lib/data";
 import { NewsletterForm } from "@/components/NewsletterForm";
 
@@ -69,13 +69,13 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="neu-inset-lg rounded-full aspect-square max-w-sm mx-auto p-4 overflow-hidden relative">
+        <div className="rounded-full w-[340px] h-[340px] lg:w-[380px] lg:h-[380px] mx-auto overflow-hidden relative shrink-0" style={{boxShadow: '8px 8px 20px rgba(140,95,72,0.18), -8px -8px 20px rgba(255,255,255,0.85), 0 0 0 3px rgba(196,120,90,0.12)'}}>
           <Image
-            src="/images/products/hero.jpg"
+            src="/images/products/special-of-the-day.jpg"
             alt="Cakes made with love"
             fill
-            sizes="(max-width: 1024px) 60vw, 380px"
-            className="object-cover rounded-full"
+            sizes="380px"
+            className="object-cover"
           />
         </div>
 
@@ -131,13 +131,13 @@ export default function HomePage() {
             See What&apos;s Baking
           </Button>
         </div>
-        <div className="neu-inset-lg rounded-full aspect-square max-w-xs mx-auto p-4 overflow-hidden relative">
+        <div className="rounded-full w-[300px] h-[300px] lg:w-[360px] lg:h-[360px] mx-auto overflow-hidden relative shrink-0" style={{boxShadow: '8px 8px 20px rgba(140,95,72,0.18), -8px -8px 20px rgba(255,255,255,0.85), 0 0 0 3px rgba(196,120,90,0.12)'}}>
           <Image
-            src="/images/products/about.jpg"
+            src="/images/products/strawberry-delight.jpg"
             alt="Our bakery story"
             fill
-            sizes="(max-width: 1024px) 60vw, 300px"
-            className="object-cover rounded-full"
+            sizes="360px"
+            className="object-cover"
           />
         </div>
       </section>
@@ -206,54 +206,7 @@ export default function HomePage() {
         ))}
       </section>
 
-      {/* App promotion */}
-      <section className="px-4 md:px-8 pb-16 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-10 items-center">
-        <div>
-          <div className="text-xs font-bold tracking-[0.15em] uppercase text-cocoa mb-2">
-            Get the App
-          </div>
-          <h2 className="font-serif text-3xl md:text-4xl text-ink mb-4">
-            Order From Your Pocket
-          </h2>
-          <p className="text-ink-soft mb-6">
-            Track orders, save designs, and reorder favourites in a tap.
-          </p>
-          <div className="flex gap-3">
-            <div className="neu-raised-sm rounded-full px-5 py-2.5 text-xs font-semibold text-cocoa">
-              App Store
-            </div>
-            <div className="neu-raised-sm rounded-full px-5 py-2.5 text-xs font-semibold text-cocoa">
-              Google Play
-            </div>
-          </div>
-        </div>
 
-        <div className="mx-auto">
-          <div className="neu-raised rounded-[2.5rem] w-56 h-[420px] p-3">
-            <div className="neu-inset rounded-[2rem] w-full h-full p-4 flex flex-col gap-2">
-              <div className="h-3 w-16 rounded-full bg-cocoa/20 mb-2" />
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="neu-raised-sm rounded-xl h-14 w-full" />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {[
-            { icon: Leaf, title: "Quality Ingredients", copy: "We use only the finest and freshest ingredients." },
-            { icon: Heart, title: "Made With Love", copy: "Every cake is handcrafted with passion and care." },
-            { icon: Gift, title: "Perfect for Any Occasion", copy: "Birthdays, celebrations, or just because." },
-            { icon: Truck, title: "Fast & Reliable Delivery", copy: "Get your favourite cakes delivered to your door." },
-          ].map((f) => (
-            <div key={f.title} className="neu-raised rounded-2xl p-4">
-              <IconBubble icon={f.icon} size={40} className="mb-3" />
-              <div className="text-sm font-bold text-ink mb-1">{f.title}</div>
-              <div className="text-xs text-ink-soft leading-snug">{f.copy}</div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* Testimonials */}
       <section className="px-4 md:px-8 pb-16 max-w-7xl mx-auto">

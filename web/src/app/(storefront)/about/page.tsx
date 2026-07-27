@@ -26,14 +26,29 @@ export default function AboutPage() {
             no shortcuts, and a little extra frosting on every slice.
           </p>
         </div>
-        <div className="rounded-full w-[280px] h-[280px] lg:w-[360px] lg:h-[360px] mx-auto overflow-hidden relative shrink-0" style={{boxShadow: '8px 8px 20px rgba(140,95,72,0.18), -8px -8px 20px rgba(255,255,255,0.85), 0 0 0 3px rgba(196,120,90,0.12)'}}>
-          <Image
-            src="/397933929_349910914162675_2573495290687325833_n.jpg"
-            alt="Bakestudio founder"
-            fill
-            sizes="360px"
-            className="object-cover"
-          />
+        <div className="relative mx-auto flex items-center justify-center">
+          {/* Animated background glow */}
+          <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-rose/30 via-cocoa/20 to-rose-light/40 blur-xl animate-pulse-glow" />
+
+          {/* Logo container with neumorphic ring */}
+          <div className="rounded-full w-[280px] h-[280px] lg:w-[360px] lg:h-[360px] relative overflow-hidden shrink-0 animate-float" style={{boxShadow: '10px 10px 25px rgba(140,95,72,0.22), -10px -10px 25px rgba(255,255,255,0.9), 0 0 0 4px rgba(196,120,90,0.2)'}}>
+            <Image
+              src="/397933929_349910914162675_2573495290687325833_n.jpg"
+              alt="Bakestudio Founder Logo"
+              fill
+              sizes="360px"
+              className="object-cover transition-transform duration-700 hover:scale-105"
+            />
+          </div>
+
+          {/* Floating animated badges */}
+          <div className="absolute -top-2 -left-4 neu-raised rounded-full px-4 py-2 text-xs font-bold text-cocoa flex items-center gap-1.5 animate-float shadow-lg">
+            <Heart size={14} className="text-rose-500 fill-rose-500 animate-pulse" /> Handcrafted
+          </div>
+
+          <div className="absolute -bottom-2 -right-4 neu-raised rounded-full px-4 py-2 text-xs font-bold text-cocoa flex items-center gap-1.5 animate-float-reverse shadow-lg">
+            <ChefHat size={14} className="text-cocoa" /> Artisan Baker
+          </div>
         </div>
       </div>
 

@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Heart, Menu, Search, ShoppingBag, User, X } from "lucide-react";
+import { Heart, Menu, Search, ShieldCheck, ShoppingBag, User, X } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
 import { LinkButton } from "@/components/ui/Button";
 import { useCartStore, cartCount } from "@/store/cart-store";
 import { useWishlistStore } from "@/store/cart-store";
+import { useThemeStore } from "@/store/theme-store";
 import { products } from "@/lib/data";
 
 const navItems = [
@@ -20,7 +21,11 @@ const navItems = [
   { href: "/contact", label: "Contact Us" },
 ];
 
-export function SiteHeader() {
+type SiteHeaderProps = {
+  onOpenCart?: () => void;
+};
+
+export function SiteHeader({ onOpenCart }: SiteHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -30,6 +35,7 @@ export function SiteHeader() {
 
   const lines = useCartStore((s) => s.lines);
   const wishlistIds = useWishlistStore((s) => s.ids);
+  const { siteTagline } = useThemeStore();
 
   useEffect(() => setMounted(true), []);
 
@@ -44,7 +50,7 @@ export function SiteHeader() {
       : [];
 
   return (
-    <header className="sticky top-0 z-50 bg-base px-4 md:px-8 py-4 flex items-center justify-between gap-4 flex-wrap shadow-[0_4px_12px_rgba(60,42,34,0.06)]">
+    <header className="sticky top-0 z-40 bg-base px-4 md:px-8 py-4 flex items-center justify-between gap-4 flex-wrap shadow-[0_4px_12px_rgba(60,42,34,0.06)] transition-colors duration-300">
       <Link href="/" className="flex items-center gap-2">
         <div className="w-14 h-14 rounded-full overflow-hidden neu-raised-sm shrink-0">
           <Image
@@ -57,7 +63,7 @@ export function SiteHeader() {
         </div>
         <div>
           <div className="font-serif text-xl leading-none text-ink">Bakestudio</div>
-          <div className="text-[11px] text-ink-soft">Treat yourself to something special</div>
+          <div className="text-[11px] text-ink-soft">{siteTagline || "Treat yourself to something special"}</div>
         </div>
       </Link>
 
@@ -69,8 +75,8 @@ export function SiteHeader() {
               key={item.href}
               href={item.href}
               className={clsx(
-                "px-4 py-2 rounded-full text-sm font-semibold neu-pressable",
-                active ? "neu-inset text-cocoa" : "text-ink-soft"
+                "px-4 py-2 rounded-full text-sm font-semibold neu-pressable transition-all",
+                active ? "neu-inset text-cocoa" : "text-ink-soft hover:text-ink"
               )}
             >
               {item.label}
@@ -80,6 +86,7 @@ export function SiteHeader() {
       </nav>
 
       <div className="flex items-center gap-3">
+        {/* Search */}
         <div className="relative hidden sm:block">
           <div
             className={clsx(
@@ -122,33 +129,38 @@ export function SiteHeader() {
           )}
         </div>
 
+        {/* Wishlist */}
         <Link href="/account/wishlist" className="relative">
           <div className="neu-raised-sm w-10 h-10 rounded-full flex items-center justify-center text-cocoa">
             <Heart size={18} />
           </div>
           {wishCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-cocoa text-[#fff6ec] text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 bg-cocoa text-[#fff6ec] text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
               {wishCount}
             </span>
           )}
         </Link>
 
-        <Link href="/account" className="hidden sm:block">
-          <div className="neu-raised-sm w-10 h-10 rounded-full flex items-center justify-center text-cocoa">
-            <User size={18} />
+        {/* Admin Quick Trigger */}
+        <Link href="/admin" title="Admin Control Panel">
+          <div className="neu-raised-sm w-10 h-10 rounded-full flex items-center justify-center text-cocoa hover:bg-rose-light/50 transition-all">
+            <ShieldCheck size={18} />
           </div>
         </Link>
 
-        <Link href="/cart" className="relative">
-          <div className="neu-raised-sm w-10 h-10 rounded-full flex items-center justify-center text-cocoa">
-            <ShoppingBag size={18} />
-          </div>
+        {/* Shopping Cart Drawer Trigger */}
+        <button
+          onClick={onOpenCart ? onOpenCart : () => router.push("/cart")}
+          className="relative neu-raised-sm w-10 h-10 rounded-full flex items-center justify-center text-cocoa"
+          title="Open Cart"
+        >
+          <ShoppingBag size={18} />
           {count > 0 && (
-            <span className="absolute -top-1 -right-1 bg-cocoa text-[#fff6ec] text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+            <span className="absolute -top-1 -right-1 bg-cocoa text-[#fff6ec] text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
               {count}
             </span>
           )}
-        </Link>
+        </button>
 
         <div className="hidden md:block">
           <LinkButton href="/shop" size="sm">
@@ -180,6 +192,13 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
+          <Link
+            href="/admin"
+            onClick={() => setMenuOpen(false)}
+            className="px-4 py-3 rounded-xl text-sm font-bold text-cocoa neu-raised-sm flex items-center gap-2 mt-1"
+          >
+            <ShieldCheck size={16} /> Admin Panel & Theme Builder
+          </Link>
         </div>
       )}
     </header>

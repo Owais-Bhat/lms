@@ -69,44 +69,65 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="rounded-full w-[340px] h-[340px] lg:w-[380px] lg:h-[380px] mx-auto overflow-hidden relative shrink-0" style={{boxShadow: '8px 8px 20px rgba(140,95,72,0.18), -8px -8px 20px rgba(255,255,255,0.85), 0 0 0 3px rgba(196,120,90,0.12)'}}>
-          <Image
-            src="/images/products/special-of-the-day.jpg"
-            alt="Cakes made with love"
-            fill
-            sizes="380px"
-            className="object-cover"
-          />
+        {/* Real Photo Hero Cake Graphics with Animation & Badges */}
+        <div className="relative mx-auto flex items-center justify-center my-4 lg:my-0">
+          {/* Animated Background Aura */}
+          <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-rose/40 via-cocoa/15 to-rose-light/50 blur-2xl animate-pulse-glow" />
+
+          {/* Main Circle Container with Real Photo */}
+          <div
+            className="rounded-full w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] lg:w-[380px] lg:h-[380px] relative overflow-hidden shrink-0 animate-float"
+            style={{
+              boxShadow: "12px 12px 28px rgba(140,95,72,0.22), -12px -12px 28px rgba(255,255,255,0.9), 0 0 0 4px rgba(196,120,90,0.18)",
+            }}
+          >
+            <Image
+              src="/images/products/wedding-tiered-elegance.jpg"
+              alt="Real Luxury Bakery Cake"
+              fill
+              sizes="380px"
+              className="object-cover transition-transform duration-700 hover:scale-105"
+              priority
+            />
+          </div>
+
+          {/* Floating Interactive Badges */}
+          <div className="absolute -top-1 -right-2 neu-raised rounded-full px-4 py-2 text-xs font-bold text-cocoa flex items-center gap-1.5 animate-float shadow-md z-10">
+            <Star size={14} className="text-amber-500 fill-amber-500" /> 4.9 Rating
+          </div>
+          <div className="absolute -bottom-2 -left-2 neu-raised rounded-full px-4 py-2 text-xs font-bold text-cocoa flex items-center gap-1.5 animate-float-reverse shadow-md z-10">
+            <Cake size={14} className="text-cocoa" /> Fresh Daily
+          </div>
         </div>
 
         <div className="neu-raised rounded-3xl p-6">
+          <div className="text-xs font-bold tracking-wider text-cocoa uppercase mb-1">Bakery Special</div>
           <h3 className="font-serif text-2xl text-ink mb-3">
-            Lorem Ipsum is simply dummy text of
+            Handcrafted With Premium Ingredients
           </h3>
           <p className="text-sm text-ink-soft mb-5 leading-relaxed">
-            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
-            Ipsum has been the industry&apos;s standard dummy text ever since the 1500s.
+            From signature multi-tier celebration cakes to delicate morning pastries, every bite is baked fresh daily using pure Belgian chocolate and real vanilla beans.
           </p>
-          <Button variant="ghost" size="sm">
-            Learn More
-          </Button>
+          <LinkButton href="/shop" variant="ghost" size="sm">
+            Explore Menu
+          </LinkButton>
         </div>
       </section>
 
       {/* Shop by category */}
       <section className="px-4 md:px-8 pb-16 max-w-7xl mx-auto">
         <SectionHeading eyebrow="Categories" title="Shop by Occasion" />
-        <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 py-4 px-2">
           {categories.map((cat) => {
             const Icon = categoryIcons[cat.icon] ?? Cake;
             return (
               <Link
                 key={cat.slug}
                 href={`/shop?category=${cat.slug}`}
-                className="neu-raised rounded-2xl px-6 py-5 flex flex-col items-center gap-3 min-w-[110px] shrink-0 neu-pressable"
+                className="neu-raised rounded-2xl px-4 py-5 flex flex-col items-center justify-center gap-3 w-full neu-pressable"
               >
-                <IconBubble icon={Icon} size={48} />
-                <span className="text-xs font-semibold text-ink text-center">{cat.name}</span>
+                <IconBubble icon={Icon} size={44} />
+                <span className="text-xs font-semibold text-ink text-center leading-tight">{cat.name}</span>
               </Link>
             );
           })}
@@ -123,22 +144,35 @@ export default function HomePage() {
             Baked with Passion Since Day One
           </h2>
           <p className="text-ink-soft mb-6 leading-relaxed">
-            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
-            Ipsum has been the industry&apos;s standard dummy text ever since the 1500s, when an
-            unknown printer took a galley of type and scrambled it.
+            Bakestudio started in a small kitchen with one oven and a passion for crafting memorable moments. Every single cake is custom-designed, freshly frosted, and made with 100% natural ingredients.
           </p>
-          <Button variant="ghost" size="md">
-            See What&apos;s Baking
-          </Button>
+          <LinkButton href="/about" variant="ghost" size="md">
+            Read Our Full Story
+          </LinkButton>
         </div>
-        <div className="rounded-full w-[300px] h-[300px] lg:w-[360px] lg:h-[360px] mx-auto overflow-hidden relative shrink-0" style={{boxShadow: '8px 8px 20px rgba(140,95,72,0.18), -8px -8px 20px rgba(255,255,255,0.85), 0 0 0 3px rgba(196,120,90,0.12)'}}>
-          <Image
-            src="/images/products/strawberry-delight.jpg"
-            alt="Our bakery story"
-            fill
-            sizes="360px"
-            className="object-cover"
-          />
+
+        {/* Real Photo Story Illustration */}
+        <div className="relative mx-auto flex items-center justify-center">
+          <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-cocoa/20 via-rose/30 to-rose-light/40 blur-xl animate-pulse-glow" />
+          
+          <div
+            className="rounded-full w-[300px] h-[300px] lg:w-[360px] lg:h-[360px] relative overflow-hidden shrink-0 animate-float-reverse"
+            style={{
+              boxShadow: "10px 10px 25px rgba(140,95,72,0.22), -10px -10px 25px rgba(255,255,255,0.9), 0 0 0 4px rgba(196,120,90,0.18)",
+            }}
+          >
+            <Image
+              src="/images/products/special-of-the-day.jpg"
+              alt="Real Bakery Creation"
+              fill
+              sizes="360px"
+              className="object-cover transition-transform duration-700 hover:scale-105"
+            />
+          </div>
+
+          <div className="absolute -bottom-2 -right-2 neu-raised rounded-full px-4 py-2 text-xs font-bold text-cocoa flex items-center gap-1.5 animate-float shadow-md z-10">
+            <Heart size={14} className="text-rose-500 fill-rose-500" /> Made With Love
+          </div>
         </div>
       </section>
 

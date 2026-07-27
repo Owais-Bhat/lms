@@ -1,27 +1,123 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Trash2, X, Check, Database } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { categories, products } from "@/lib/data";
+import { categories as initialCategories, products as initialProducts, type Product } from "@/lib/data";
+import { supabaseDb } from "@/lib/supabase";
 
 export default function AdminProductsPage() {
   const [tab, setTab] = useState<"products" | "categories">("products");
   const [query, setQuery] = useState("");
+  const [productList, setProductList] = useState<Product[]>(initialProducts);
+  const [categoryList, setCategoryList] = useState(initialCategories);
+
   const [active, setActive] = useState<Record<string, boolean>>(
-    Object.fromEntries(products.map((p) => [p.id, true]))
+    Object.fromEntries(initialProducts.map((p) => [p.id, true]))
   );
 
-  const filtered = products.filter((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()));
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newCategory, setNewCategory] = useState("birthday");
+  const [newPrice, setNewPrice] = useState("32");
+  const [newDesc, setNewDesc] = useState("");
+  const [syncing, setSyncing] = useState(false);
+
+  useEffect(() => {
+    fetchProductsFromSupabase();
+  }, []);
+
+  async function fetchProductsFromSupabase() {
+    const fetched = await supabaseDb.select<any>("products", "*");
+    if (fetched && Array.isArray(fetched) && fetched.length > 0) {
+      const formatted: Product[] = fetched.map((row) => ({
+        id: row.id,
+        slug: row.slug,
+        name: row.name,
+        category: row.category,
+        description: row.description,
+        flavor: row.flavor || "Vanilla",
+        price: Number(row.price),
+        rating: Number(row.rating || 5),
+        reviewCount: Number(row.review_count || 1),
+        eggless: Boolean(row.eggless),
+        glutenFree: Boolean(row.gluten_free),
+        weights: typeof row.weights === "string" ? JSON.parse(row.weights) : row.weights || [],
+        illustration: row.illustration || "layer-drip",
+        image: row.image || "/images/products/wedding-tiered-elegance.jpg",
+      }));
+      setProductList(formatted);
+    }
+  }
+
+  const filtered = productList.filter((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()));
+
+  async function handleAddProduct(e: React.FormEvent) {
+    e.preventDefault();
+    setSyncing(true);
+    const createdProduct: Product = {
+      id: `p-${Date.now()}`,
+      slug: newName.toLowerCase().replace(/\s+/g, "-"),
+      name: newName,
+      category: newCategory,
+      description: newDesc || "Freshly baked artisan cake handcrafted with love.",
+      flavor: "Vanilla & Chocolate",
+      price: parseFloat(newPrice) || 29.99,
+      rating: 5.0,
+      reviewCount: 1,
+      eggless: true,
+      glutenFree: false,
+      weights: [
+        { label: "0.5kg", priceDelta: 0 },
+        { label: "1.0kg", priceDelta: 12 },
+      ],
+      illustration: "layer-drip",
+      image: "/images/products/wedding-tiered-elegance.jpg",
+    };
+
+    // Insert into Supabase products table
+    await supabaseDb.insert("products", {
+      id: createdProduct.id,
+      slug: createdProduct.slug,
+      name: createdProduct.name,
+      category: createdProduct.category,
+      description: createdProduct.description,
+      flavor: createdProduct.flavor,
+      price: createdProduct.price,
+      rating: createdProduct.rating,
+      review_count: createdProduct.reviewCount,
+      eggless: createdProduct.eggless,
+      gluten_free: createdProduct.glutenFree,
+      weights: createdProduct.weights,
+      illustration: createdProduct.illustration,
+      image: createdProduct.image,
+      active: true,
+    });
+
+    setProductList([createdProduct, ...productList]);
+    setActive((prev) => ({ ...prev, [createdProduct.id]: true }));
+    setShowAddModal(false);
+    setNewName("");
+    setNewDesc("");
+    setSyncing(false);
+  }
+
+  async function handleDeleteProduct(id: string) {
+    await supabaseDb.delete("products", "id", id);
+    setProductList(productList.filter((p) => p.id !== id));
+  }
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="font-serif text-3xl text-ink">Products & Categories</h1>
-        <Button size="sm">
-          <Plus size={14} /> Add Product
+        <div>
+          <h1 className="font-serif text-3xl text-ink mb-1">Products & Categories</h1>
+          <p className="text-xs text-ink-soft">{productList.length} products available</p>
+        </div>
+        <Button size="sm" onClick={() => setShowAddModal(true)} className="gap-1.5">
+          <Plus size={16} /> Add Product
         </Button>
       </div>
 
@@ -32,7 +128,7 @@ export default function AdminProductsPage() {
             onClick={() => setTab(t)}
             className={
               t === tab
-                ? "neu-raised-sm rounded-full px-5 py-2 text-sm font-semibold text-cocoa capitalize"
+                ? "neu-raised-sm rounded-full px-5 py-2 text-sm font-bold text-cocoa capitalize"
                 : "px-5 py-2 text-sm font-semibold text-ink-soft capitalize"
             }
           >
@@ -48,7 +144,7 @@ export default function AdminProductsPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search products..."
+              placeholder="Search products by name..."
               className="bg-transparent outline-none text-sm w-full placeholder:text-ink-soft"
             />
           </div>
@@ -57,35 +153,39 @@ export default function AdminProductsPage() {
             <table className="w-full text-sm min-w-[800px]">
               <thead>
                 <tr className="text-left text-xs text-ink-soft border-b border-ink/5">
-                  <th className="p-4">Product</th>
-                  <th className="p-4">Category</th>
-                  <th className="p-4">Price</th>
-                  <th className="p-4">Stock</th>
-                  <th className="p-4">Active</th>
-                  <th className="p-4">Actions</th>
+                  <th className="p-4 font-bold">Product</th>
+                  <th className="p-4 font-bold">Category</th>
+                  <th className="p-4 font-bold">Price</th>
+                  <th className="p-4 font-bold">Stock</th>
+                  <th className="p-4 font-bold">Active</th>
+                  <th className="p-4 font-bold text-right">Delete</th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((p) => (
-                  <tr key={p.id} className="border-b border-ink/5 last:border-0">
+                  <tr key={p.id} className="border-b border-ink/5 last:border-0 hover:bg-cocoa/5">
                     <td className="p-4">
                       <div className="flex items-center gap-3">
-                        <div className="neu-inset rounded-lg w-10 h-10 relative overflow-hidden shrink-0">
+                        <div className="neu-inset rounded-xl w-10 h-10 relative overflow-hidden shrink-0">
                           <Image src={p.image} alt={p.name} fill sizes="40px" className="object-cover" />
                         </div>
                         <span className="font-semibold text-ink">{p.name}</span>
                       </div>
                     </td>
-                    <td className="p-4 text-ink-soft capitalize">{p.category}</td>
-                    <td className="p-4 font-semibold text-ink">${p.price.toFixed(2)}</td>
-                    <td className="p-4 text-ink-soft">In Stock</td>
+                    <td className="p-4 text-ink-soft capitalize font-semibold">{p.category}</td>
+                    <td className="p-4 font-extrabold text-cocoa">${p.price.toFixed(2)}</td>
+                    <td className="p-4">
+                      <span className="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full">
+                        In Stock
+                      </span>
+                    </td>
                     <td className="p-4">
                       <button
                         onClick={() => setActive((prev) => ({ ...prev, [p.id]: !prev[p.id] }))}
                         className={
                           active[p.id]
-                            ? "w-10 h-5 rounded-full neu-inset relative"
-                            : "w-10 h-5 rounded-full neu-raised-sm relative"
+                            ? "w-10 h-5 rounded-full neu-inset relative bg-cocoa/20"
+                            : "w-10 h-5 rounded-full neu-raised-sm relative bg-gray-200"
                         }
                       >
                         <span
@@ -96,10 +196,13 @@ export default function AdminProductsPage() {
                         />
                       </button>
                     </td>
-                    <td className="p-4">
-                      <Link href={`/admin/products/${p.id}`} className="text-cocoa font-semibold text-xs">
-                        Edit
-                      </Link>
+                    <td className="p-4 text-right">
+                      <button
+                        onClick={() => handleDeleteProduct(p.id)}
+                        className="text-rose-600 hover:text-rose-800 p-1 text-xs"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -111,21 +214,91 @@ export default function AdminProductsPage() {
         <div className="neu-raised rounded-3xl p-6">
           <div className="text-sm font-bold text-ink mb-4">Category Tree</div>
           <div className="flex flex-col gap-2">
-            {categories.map((c) => (
+            {categoryList.map((c) => (
               <div
                 key={c.slug}
                 className="neu-raised-sm rounded-2xl px-4 py-3 flex items-center justify-between"
               >
                 <span className="text-sm font-semibold text-ink">{c.name}</span>
-                <div className="flex gap-2">
-                  <button className="text-xs font-semibold text-cocoa">Edit</button>
-                  <button className="text-xs font-semibold text-red-700">Remove</button>
-                </div>
+                <span className="text-xs font-mono font-bold text-cocoa">slug: /{c.slug}</span>
               </div>
             ))}
-            <button className="neu-flat rounded-2xl px-4 py-3 text-sm font-semibold text-cocoa text-left mt-2">
-              + Add Category
+          </div>
+        </div>
+      )}
+
+      {/* Add Product Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setShowAddModal(false)} />
+
+          <div className="relative w-full max-w-md neu-raised rounded-3xl p-6 md:p-8 shadow-2xl z-10 border border-cocoa/10">
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="absolute top-6 right-6 neu-raised-sm w-9 h-9 rounded-full flex items-center justify-center text-ink-soft hover:text-ink"
+            >
+              <X size={18} />
             </button>
+
+            <form onSubmit={handleAddProduct} className="space-y-4">
+              <h2 className="font-serif text-2xl text-ink">Add New Product</h2>
+
+              <div>
+                <label className="block text-xs font-bold text-cocoa uppercase mb-1">Product Name</label>
+                <input
+                  type="text"
+                  required
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  placeholder="e.g. Royal Raspberry Truffle Cake"
+                  className="neu-inset rounded-2xl p-3 text-xs text-ink outline-none w-full font-semibold"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-cocoa uppercase mb-1">Category</label>
+                  <select
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    className="neu-inset rounded-2xl p-3 text-xs text-ink outline-none w-full font-semibold bg-transparent"
+                  >
+                    {categoryList.map((c) => (
+                      <option key={c.slug} value={c.slug}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-cocoa uppercase mb-1">Price ($)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    className="neu-inset rounded-2xl p-3 text-xs text-ink outline-none w-full font-semibold"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-cocoa uppercase mb-1">Description</label>
+                <textarea
+                  rows={3}
+                  value={newDesc}
+                  onChange={(e) => setNewDesc(e.target.value)}
+                  placeholder="Short enticing product description..."
+                  className="neu-inset rounded-2xl p-3 text-xs text-ink outline-none w-full font-medium resize-none"
+                />
+              </div>
+
+              <Button type="submit" size="md" className="w-full justify-center gap-2">
+                <Check size={16} /> Save & Publish Product
+              </Button>
+            </form>
           </div>
         </div>
       )}

@@ -1,32 +1,39 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import {
   Bell,
   ChefHat,
   CreditCard,
   LayoutDashboard,
+  LogOut,
   Megaphone,
   Menu,
   MessageSquare,
   Package,
+  Palette,
   Search,
   Settings,
   ShieldCheck,
   ShoppingBag,
+  Sparkles,
   Truck,
   Users,
   X,
 } from "lucide-react";
-import { LinkButton } from "@/components/ui/Button";
+import { LinkButton, Button } from "@/components/ui/Button";
+import { useAuthStore } from "@/store/auth-store";
 
 const navGroups = [
   {
     label: "Overview",
-    items: [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }],
+    items: [
+      { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/admin/theme", label: "Theme & 3D Styling", icon: Palette },
+    ],
   },
   {
     label: "Sales",
@@ -40,33 +47,38 @@ const navGroups = [
     items: [{ href: "/admin/products", label: "Products & Categories", icon: Package }],
   },
   {
-    label: "Grow",
-    items: [
-      { href: "/admin/marketing", label: "Marketing", icon: Megaphone },
-      { href: "/admin/content", label: "Reviews & Content", icon: MessageSquare },
-    ],
-  },
-  {
     label: "Operations",
     items: [
-      { href: "/admin/logistics", label: "Delivery & Logistics", icon: Truck },
       { href: "/admin/kitchen", label: "Kitchen Queue", icon: ChefHat },
-      { href: "/admin/finance", label: "Payments & Finance", icon: CreditCard },
+      { href: "/admin/logistics", label: "Delivery & Logistics", icon: Truck },
     ],
   },
   {
-    label: "System",
+    label: "System Settings",
     items: [
-      { href: "/admin/analytics", label: "Analytics", icon: LayoutDashboard },
-      { href: "/admin/staff", label: "Staff & Roles", icon: ShieldCheck },
-      { href: "/admin/settings", label: "Settings", icon: Settings },
+      { href: "/admin/analytics", label: "Analytics", icon: Sparkles },
+      { href: "/admin/settings", label: "General Settings", icon: Settings },
     ],
   },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { isAuthenticated, logout, adminUser } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Auth Protection Guard
+  useEffect(() => {
+    if (!isAuthenticated && pathname !== "/admin/login") {
+      router.push("/admin/login");
+    }
+  }, [isAuthenticated, pathname, router]);
+
+  // Bypass AdminLayout wrapper for the login page itself
+  if (pathname === "/admin/login") {
+    return <>{children}</>;
+  }
 
   const activeLabel =
     navGroups.flatMap((g) => g.items).find((i) => i.href === pathname)?.label ?? "Dashboard";
@@ -74,7 +86,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const Sidebar = (
     <nav className="flex flex-col gap-6 p-4 h-full overflow-y-auto">
       <Link href="/admin" className="flex items-center gap-3 px-2 mb-2">
-        <div className="neu-raised-sm w-10 h-10 rounded-full flex items-center justify-center font-serif text-lg text-cocoa">
+        <div className="neu-raised-sm w-10 h-10 rounded-full flex items-center justify-center font-serif text-lg text-cocoa bg-rose-light/40">
           B
         </div>
         <div>
@@ -97,11 +109,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
                   className={clsx(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold",
-                    active ? "neu-inset text-cocoa" : "text-ink-soft hover:text-ink"
+                    "flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition-all",
+                    active
+                      ? "neu-inset text-cocoa font-bold"
+                      : "text-ink-soft hover:text-ink hover:bg-cocoa/5"
                   )}
                 >
-                  <item.icon size={16} />
+                  <item.icon size={16} className={active ? "text-cocoa" : "text-ink-soft"} />
                   {item.label}
                 </Link>
               );
@@ -109,22 +123,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
       ))}
+
+      <div className="mt-auto pt-4 border-t border-ink/10 flex flex-col gap-2">
+        <Link href="/" target="_blank" className="text-xs text-ink-soft hover:text-cocoa flex items-center gap-2 px-3 py-2">
+          <span>↗ View Live Storefront</span>
+        </Link>
+        <button
+          onClick={() => {
+            logout();
+            router.push("/admin/login");
+          }}
+          className="flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-rose-700 hover:bg-rose-100/50 rounded-xl transition-all"
+        >
+          <LogOut size={15} />
+          <span>Sign Out ({adminUser?.username ?? "admin"})</span>
+        </button>
+      </div>
     </nav>
   );
 
   return (
     <div className="min-h-screen flex bg-base-light">
-      <aside className="hidden lg:block w-64 shrink-0 border-r border-ink/5">{Sidebar}</aside>
+      <aside className="hidden lg:block w-64 shrink-0 border-r border-ink/5 bg-base">{Sidebar}</aside>
 
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/30" onClick={() => setSidebarOpen(false)} />
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
           <div className="absolute left-0 top-0 bottom-0 w-72 bg-base neu-raised">{Sidebar}</div>
         </div>
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 z-40 bg-base-light px-4 md:px-6 py-3 flex items-center justify-between gap-4 border-b border-ink/5">
+        <header className="sticky top-0 z-40 bg-base px-4 md:px-6 py-3 flex items-center justify-between gap-4 border-b border-ink/5 shadow-sm">
           <div className="flex items-center gap-3 min-w-0">
             <button
               className="lg:hidden neu-raised-sm w-9 h-9 rounded-full flex items-center justify-center shrink-0"
@@ -133,28 +163,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             >
               <Menu size={16} />
             </button>
-            <div className="text-xs text-ink-soft truncate">Admin / {activeLabel}</div>
+            <div className="text-xs text-ink-soft truncate font-semibold">Admin / {activeLabel}</div>
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="hidden md:flex items-center gap-2 neu-inset rounded-full px-4 py-2 w-64">
-              <Search size={14} className="text-cocoa shrink-0" />
-              <input
-                placeholder="Search orders, products, customers..."
-                className="bg-transparent outline-none text-sm w-full placeholder:text-ink-soft"
-              />
-            </div>
-            <button className="relative neu-raised-sm w-9 h-9 rounded-full flex items-center justify-center text-cocoa">
-              <Bell size={16} />
-              <span className="absolute -top-1 -right-1 bg-cocoa text-[#fff6ec] text-[9px] rounded-full w-4 h-4 flex items-center justify-center">
-                3
-              </span>
-            </button>
-            <LinkButton href="/admin/orders" size="sm">
-              + New Order
+            <LinkButton href="/admin/theme" size="sm" variant="ghost">
+              <Palette size={14} /> Theme Builder
             </LinkButton>
-            <div className="neu-raised-sm w-9 h-9 rounded-full flex items-center justify-center font-bold text-cocoa text-xs shrink-0">
-              OB
+            <LinkButton href="/admin/orders" size="sm">
+              + Manage Orders
+            </LinkButton>
+            <div className="neu-raised-sm w-9 h-9 rounded-full flex items-center justify-center font-bold text-cocoa text-xs shrink-0 bg-rose-light/50">
+              {adminUser?.username?.slice(0, 2).toUpperCase() ?? "AD"}
             </div>
           </div>
         </header>

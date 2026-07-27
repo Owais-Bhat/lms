@@ -351,20 +351,23 @@ export default function AdminThemePage() {
 
                 <div>
                   <label className="block text-xs font-bold text-cocoa uppercase mb-2">3D Particle Style</label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {[
-                      { key: "sparkles", label: "Golden Sparkles" },
-                      { key: "flour-dust", label: "Bakery Flour Dust" },
-                      { key: "stars", label: "4-Point Magic Stars" },
+                      { key: "sparkles", label: "Golden Sparkles", emoji: "✨", desc: "Warm glowing light flares" },
+                      { key: "flour-dust", label: "Bakery Flour Dust", emoji: "🌫️", desc: "Soft pale drifting powder" },
+                      { key: "pastries", label: "Floating Pastries", emoji: "🧁", desc: "Tiny spinning cupcakes & cookies" },
+                      { key: "stars", label: "4-Point Magic Stars", emoji: "⭐", desc: "Twinkling sparkle stars" },
                     ].map((st) => (
                       <button
                         key={st.key}
                         onClick={() => theme.update3DBackground({ bg3dStyle: st.key as Background3DStyle })}
-                        className={`p-3.5 rounded-2xl text-xs font-bold transition-all ${
+                        className={`p-3.5 rounded-2xl text-xs font-bold transition-all flex flex-col items-center gap-1.5 text-center ${
                           theme.bg3dStyle === st.key ? "neu-inset text-cocoa font-extrabold" : "neu-raised-sm text-ink-soft"
                         }`}
                       >
-                        {st.label}
+                        <span className="text-2xl leading-none">{st.emoji}</span>
+                        <span>{st.label}</span>
+                        <span className="text-[10px] font-normal text-ink-soft/80 leading-tight">{st.desc}</span>
                       </button>
                     ))}
                   </div>

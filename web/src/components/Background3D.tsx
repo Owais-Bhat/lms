@@ -14,8 +14,12 @@ type Particle = {
   vz: number;
   alpha: number;
   pulseSpeed: number;
-  type: "sparkle" | "dust" | "pastry" | "star";
+  rotation: number;
+  vrot: number;
+  glyph: string;
 };
+
+const PASTRY_GLYPHS = ["🧁", "🍰", "🍪", "🎂"];
 
 export function Background3D() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -57,10 +61,17 @@ export function Background3D() {
     };
     window.addEventListener("mousemove", handleMouseMove);
 
+    // Palette per style so each of the 4 presets feels visually distinct.
+    const palettes: Record<string, string[]> = {
+      sparkles: [colorCocoa, "#f5c56b", "#f0a94e", "#fff3d6"],
+      "flour-dust": ["#ffffff", "#fdf6ec", colorInkSoft, "#f3e8d8"],
+      pastries: [colorCocoa, colorRose],
+      stars: [colorRose, "#fff3d6", colorCocoa, "#ffffff"],
+    };
+    const colors = palettes[bg3dStyle] ?? palettes.sparkles;
+
     // Initialize 3D Particles
     const particles: Particle[] = [];
-    const colors = [colorCocoa, colorRose, "#f5a623", "#e0a58a", "#fff"];
-
     for (let i = 0; i < bg3dDensity; i++) {
       particles.push({
         x: Math.random() * canvas.width,
@@ -73,7 +84,9 @@ export function Background3D() {
         vz: (Math.random() - 0.5) * 0.2,
         alpha: Math.random() * 0.7 + 0.3,
         pulseSpeed: Math.random() * 0.03 + 0.01,
-        type: (bg3dStyle as Particle["type"]) || "sparkle",
+        rotation: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.02,
+        glyph: PASTRY_GLYPHS[Math.floor(Math.random() * PASTRY_GLYPHS.length)],
       });
     }
 
@@ -92,12 +105,13 @@ export function Background3D() {
         p.x += p.vx;
         p.y += p.vy;
         p.z += p.vz;
+        p.rotation += p.vrot;
         p.alpha += Math.sin(Date.now() * p.pulseSpeed) * 0.01;
 
         // Wrap around boundaries
-        if (p.y < -20) p.y = canvas.height + 20;
-        if (p.x < -20) p.x = canvas.width + 20;
-        if (p.x > canvas.width + 20) p.x = -20;
+        if (p.y < -30) p.y = canvas.height + 30;
+        if (p.x < -30) p.x = canvas.width + 30;
+        if (p.x > canvas.width + 30) p.x = -30;
 
         // Perspective 3D calculation
         const perspective = 400 / (400 + p.z);
@@ -108,35 +122,55 @@ export function Background3D() {
         ctx.save();
         ctx.globalAlpha = Math.max(0.1, Math.min(1, p.alpha)) * bg3dOpacity;
 
-        if (p.type === "sparkle") {
-          // Glow Flare
-          const gradient = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, drawRadius * 4);
+        if (bg3dStyle === "sparkles") {
+          // Warm golden glow flares — bright bokeh light bursts.
+          const gradient = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, drawRadius * 4.5);
+          gradient.addColorStop(0, p.color);
+          gradient.addColorStop(0.4, p.color);
+          gradient.addColorStop(1, "transparent");
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.arc(drawX, drawY, drawRadius * 4.5, 0, Math.PI * 2);
+          ctx.fill();
+          // tiny bright core for a "glint" look
+          ctx.globalAlpha = Math.max(0.1, Math.min(1, p.alpha)) * bg3dOpacity;
+          ctx.fillStyle = "#fffdf5";
+          ctx.beginPath();
+          ctx.arc(drawX, drawY, drawRadius * 0.6, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (bg3dStyle === "flour-dust") {
+          // Soft, fine, densely-drifting powder — small pale blurred motes.
+          const gradient = ctx.createRadialGradient(drawX, drawY, 0, drawX, drawY, drawRadius * 1.8);
           gradient.addColorStop(0, p.color);
           gradient.addColorStop(1, "transparent");
           ctx.fillStyle = gradient;
           ctx.beginPath();
-          ctx.arc(drawX, drawY, drawRadius * 4, 0, Math.PI * 2);
+          ctx.arc(drawX, drawY, drawRadius * 1.8, 0, Math.PI * 2);
           ctx.fill();
-        } else if (p.type === "stars") {
-          // 4-point star shape
+        } else if (bg3dStyle === "pastries") {
+          // Tiny floating pastry glyphs that gently spin and bob.
+          ctx.translate(drawX, drawY);
+          ctx.rotate(p.rotation);
+          ctx.font = `${Math.max(10, drawRadius * 6)}px serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(p.glyph, 0, 0);
+        } else {
+          // 4-point twinkling magic stars.
+          ctx.translate(drawX, drawY);
+          ctx.rotate(p.rotation);
           ctx.fillStyle = p.color;
           ctx.beginPath();
           for (let i = 0; i < 4; i++) {
             ctx.lineTo(
-              drawX + Math.cos((i * Math.PI) / 2) * drawRadius * 3,
-              drawY + Math.sin((i * Math.PI) / 2) * drawRadius * 3
+              Math.cos((i * Math.PI) / 2) * drawRadius * 3,
+              Math.sin((i * Math.PI) / 2) * drawRadius * 3
             );
             ctx.lineTo(
-              drawX + Math.cos((i * Math.PI) / 2 + Math.PI / 4) * drawRadius * 1,
-              drawY + Math.sin((i * Math.PI) / 2 + Math.PI / 4) * drawRadius * 1
+              Math.cos((i * Math.PI) / 2 + Math.PI / 4) * drawRadius * 1,
+              Math.sin((i * Math.PI) / 2 + Math.PI / 4) * drawRadius * 1
             );
           }
-          ctx.fill();
-        } else {
-          // Flour dust / Soft bubble
-          ctx.fillStyle = p.color;
-          ctx.beginPath();
-          ctx.arc(drawX, drawY, drawRadius * 2, 0, Math.PI * 2);
           ctx.fill();
         }
 
@@ -161,7 +195,6 @@ export function Background3D() {
     <canvas
       ref={canvasRef}
       className="fixed inset-0 pointer-events-none z-0 transition-opacity duration-1000"
-      style={{ opacity: bg3dOpacity }}
     />
   );
 }

@@ -1,0 +1,128 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss";
+
+:root {
+  --shadow-dark: #d8c9ba;
+  --shadow-light: #fffbf6;
+}
+
+@theme {
+  --color-base: #efe6dd;
+  --color-base-light: #f7f1ea;
+  --color-cocoa: #6b3a2f;
+  --color-cocoa-dark: #4e2a21;
+  --color-rose: #e7b6a4;
+  --color-rose-light: #f3d9cd;
+  --color-ink: #3c2a22;
+  --color-ink-soft: #7a6459;
+  --font-serif: var(--font-fraunces);
+  --font-sans: var(--font-manrope);
+}
+
+body {
+  background: var(--color-base);
+  color: var(--color-ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--shadow-dark);
+  border-radius: 999px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ---------- Neumorphic primitives ---------- */
+/* Declared in a layer ordered before "utilities" so that any Tailwind
+   utility class (e.g. bg-cocoa) placed alongside a .neu-* class always
+   wins the cascade, regardless of source order. */
+@layer components {
+  .neu-raised {
+    background: var(--color-base);
+    box-shadow: 8px 8px 16px var(--shadow-dark), -8px -8px 16px var(--shadow-light);
+  }
+
+  .neu-raised-sm {
+    background: var(--color-base);
+    box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+  }
+
+  .neu-inset {
+    background: var(--color-base);
+    box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+  }
+
+  .neu-inset-lg {
+    background: var(--color-base);
+    box-shadow: inset 6px 6px 14px var(--shadow-dark), inset -6px -6px 14px var(--shadow-light);
+  }
+
+  .neu-flat {
+    background: var(--color-base);
+    box-shadow: 2px 2px 5px var(--shadow-dark), -2px -2px 5px var(--shadow-light);
+  }
+
+  .neu-pressable {
+    transition: box-shadow 150ms ease, transform 150ms ease;
+  }
+  .neu-pressable:hover {
+    box-shadow: 10px 10px 20px var(--shadow-dark), -10px -10px 20px var(--shadow-light);
+  }
+  .neu-pressable:active {
+    box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+    transform: translateY(1px);
+  }
+
+  .neu-ring-cocoa {
+    box-shadow: 0 0 0 2px var(--color-cocoa);
+  }
+}
+
+/* ---------- Custom Animations ---------- */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1.5deg); }
+}
+
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(8px) rotate(-1.5deg); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 0.95; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.18) translateY(-2px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(224,165,138,0.4)); }
+  50% { filter: drop-shadow(0 0 20px rgba(196,120,90,0.7)); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 4.5s ease-in-out infinite;
+}
+
+.animate-flicker {
+  animation: flicker 1.6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}

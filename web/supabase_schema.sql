@@ -63,9 +63,19 @@ ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.theme_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 
+-- Policies use DROP IF EXISTS + CREATE (not idempotent as CREATE POLICY
+-- alone) so this whole file can be safely re-run. Without this, Supabase's
+-- SQL Editor aborts the entire batch at the first "policy already exists"
+-- error and silently never reaches statements further down the file (this
+-- is what caused the storage bucket below to never actually get created
+-- on a re-run, even though the editor reported no error on the first run).
+DROP POLICY IF EXISTS "Allow public read/write on orders" ON public.orders;
 CREATE POLICY "Allow public read/write on orders" ON public.orders FOR ALL USING (true);
+DROP POLICY IF EXISTS "Allow public read/write on products" ON public.products;
 CREATE POLICY "Allow public read/write on products" ON public.products FOR ALL USING (true);
+DROP POLICY IF EXISTS "Allow public read/write on theme_config" ON public.theme_config;
 CREATE POLICY "Allow public read/write on theme_config" ON public.theme_config FOR ALL USING (true);
+DROP POLICY IF EXISTS "Allow public read/write on admin_users" ON public.admin_users;
 CREATE POLICY "Allow public read/write on admin_users" ON public.admin_users FOR ALL USING (true);
 
 -- =======================================================
@@ -75,11 +85,15 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('product-images', 'product-images', true)
 ON CONFLICT (id) DO NOTHING;
 
+DROP POLICY IF EXISTS "Public read product-images" ON storage.objects;
 CREATE POLICY "Public read product-images" ON storage.objects
   FOR SELECT USING (bucket_id = 'product-images');
+DROP POLICY IF EXISTS "Public upload product-images" ON storage.objects;
 CREATE POLICY "Public upload product-images" ON storage.objects
   FOR INSERT WITH CHECK (bucket_id = 'product-images');
+DROP POLICY IF EXISTS "Public update product-images" ON storage.objects;
 CREATE POLICY "Public update product-images" ON storage.objects
   FOR UPDATE USING (bucket_id = 'product-images');
+DROP POLICY IF EXISTS "Public delete product-images" ON storage.objects;
 CREATE POLICY "Public delete product-images" ON storage.objects
   FOR DELETE USING (bucket_id = 'product-images');

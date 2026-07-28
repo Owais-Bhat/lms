@@ -1,27 +1,72 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import Link from "next/link";
-import { AlertTriangle, DollarSign, Palette, ShoppingBag, Sparkles, TrendingUp, UserPlus } from "lucide-react";
+import { DollarSign, Palette, ShoppingBag, TrendingUp, UserPlus } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
-import { StatusBadge } from "@/components/admin/Badge";
 import { useOrderStore } from "@/store/order-store";
-import {
-  dashboardStats,
-  lowStock,
-  orderStatusBreakdown,
-  salesTrend,
-  topProducts,
-} from "@/lib/admin-data";
+
+const STATUS_COLORS: Record<string, string> = {
+  Delivered: "#6B3A2F",
+  Baking: "#E7B6A4",
+  "Out for Delivery": "#C98A3B",
+  Pending: "#D9636B",
+  Cancelled: "#7A6459",
+};
 
 export default function AdminDashboardPage() {
-  const { orders } = useOrderStore();
+  const { orders, fetchOrdersFromSupabase } = useOrderStore();
+
+  useEffect(() => {
+    fetchOrdersFromSupabase();
+  }, [fetchOrdersFromSupabase]);
 
   const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
   const totalOrdersCount = orders.length;
   const recentOrders = orders.slice(0, 6);
 
-  const maxTrend = Math.max(...salesTrend);
-  const totalStatus = orderStatusBreakdown.reduce((s, o) => s + o.value, 0);
+  const uniqueCustomers = new Set(orders.map((o) => o.customer.email || o.customer.phone)).size;
+
+  const salesTrend = useMemo(() => {
+    const days: { label: string; total: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const label = d.toLocaleDateString(undefined, { weekday: "short" });
+      const dayTotal = orders
+        .filter((o) => new Date(o.createdAt).toDateString() === d.toDateString())
+        .reduce((sum, o) => sum + o.total, 0);
+      days.push({ label, total: dayTotal });
+    }
+    return days;
+  }, [orders]);
+  const maxTrend = Math.max(1, ...salesTrend.map((d) => d.total));
+
+  const orderStatusBreakdown = useMemo(() => {
+    const counts: Record<string, number> = {};
+    orders.forEach((o) => {
+      counts[o.status] = (counts[o.status] ?? 0) + 1;
+    });
+    return Object.entries(counts).map(([label, count]) => ({
+      label,
+      value: totalOrdersCount > 0 ? Math.round((count / totalOrdersCount) * 100) : 0,
+      color: STATUS_COLORS[label] ?? "#7A6459",
+    }));
+  }, [orders, totalOrdersCount]);
+  const totalStatus = orderStatusBreakdown.reduce((s, o) => s + o.value, 0) || 1;
+
+  const topSellingProducts = useMemo(() => {
+    const sold: Record<string, number> = {};
+    orders.forEach((o) => {
+      o.items.forEach((item) => {
+        sold[item.name] = (sold[item.name] ?? 0) + item.quantity;
+      });
+    });
+    return Object.entries(sold)
+      .map(([name, count]) => ({ name, sold: count }))
+      .sort((a, b) => b.sold - a.sold)
+      .slice(0, 5);
+  }, [orders]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -39,30 +84,14 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        <StatCard
-          icon={DollarSign}
-          label="Total Revenue"
-          value={`$${totalRevenue.toFixed(2)}`}
-          changePct={dashboardStats.revenueChangePct}
-        />
-        <StatCard
-          icon={ShoppingBag}
-          label="Total Orders"
-          value={String(totalOrdersCount)}
-          changePct={dashboardStats.ordersChangePct}
-        />
+        <StatCard icon={DollarSign} label="Total Revenue" value={`$${totalRevenue.toFixed(2)}`} />
+        <StatCard icon={ShoppingBag} label="Total Orders" value={String(totalOrdersCount)} />
         <StatCard
           icon={TrendingUp}
           label="Avg Order Value"
-          value={`$${(totalOrdersCount > 0 ? totalRevenue / totalOrdersCount : 32).toFixed(2)}`}
-          changePct={dashboardStats.avgOrderChangePct}
+          value={`$${(totalOrdersCount > 0 ? totalRevenue / totalOrdersCount : 0).toFixed(2)}`}
         />
-        <StatCard
-          icon={UserPlus}
-          label="New Customers"
-          value={String(dashboardStats.newCustomersToday)}
-          changePct={dashboardStats.newCustomersChangePct}
-        />
+        <StatCard icon={UserPlus} label="Unique Customers" value={String(uniqueCustomers)} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-6">
@@ -81,15 +110,16 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="flex items-end gap-3 h-40">
-            {salesTrend.map((v, i) => (
+            {salesTrend.map((d, i) => (
               <div key={i} className="flex-1 flex flex-col items-center gap-2">
                 <div
                   className="w-full neu-raised-sm rounded-t-lg"
-                  style={{ height: `${(v / maxTrend) * 100}%`, background: "linear-gradient(180deg, #E7B6A4, #6B3A2F)" }}
+                  style={{
+                    height: `${Math.max(2, (d.total / maxTrend) * 100)}%`,
+                    background: "linear-gradient(180deg, #E7B6A4, #6B3A2F)",
+                  }}
                 />
-                <span className="text-[10px] text-ink-soft font-semibold">
-                  {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][i]}
-                </span>
+                <span className="text-[10px] text-ink-soft font-semibold">{d.label}</span>
               </div>
             ))}
           </div>
@@ -112,6 +142,9 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             ))}
+            {orderStatusBreakdown.length === 0 && (
+              <p className="text-sm text-ink-soft">No orders yet.</p>
+            )}
           </div>
         </div>
       </div>
@@ -149,29 +182,29 @@ export default function AdminDashboardPage() {
                 ))}
               </tbody>
             </table>
+            {recentOrders.length === 0 && (
+              <p className="text-sm text-ink-soft py-4">No orders yet.</p>
+            )}
           </div>
         </div>
 
         <div className="neu-raised rounded-3xl p-6 flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 text-rose-700 mb-2">
-              <AlertTriangle size={18} />
-              <div className="font-serif text-lg text-ink font-bold">Inventory Alerts</div>
-            </div>
-            <p className="text-xs text-ink-soft mb-4">Ingredients reaching re-order threshold</p>
+            <div className="font-serif text-lg text-ink font-bold mb-2">Top Selling Products</div>
+            <p className="text-xs text-ink-soft mb-4">Ranked by units sold across all orders</p>
 
             <div className="space-y-3">
-              {lowStock.map((item) => (
-                <div key={item.name} className="flex justify-between items-center neu-inset rounded-2xl p-3 text-xs">
-                  <div>
-                    <div className="font-bold text-ink">{item.name}</div>
-                    <div className="text-[10px] text-ink-soft">Threshold: {item.threshold} {item.unit}</div>
-                  </div>
-                  <span className="text-rose-700 font-extrabold font-mono bg-rose-100 px-2 py-1 rounded-md">
-                    {item.current} {item.unit} left
+              {topSellingProducts.map((p) => (
+                <div key={p.name} className="flex justify-between items-center neu-inset rounded-2xl p-3 text-xs">
+                  <div className="font-bold text-ink">{p.name}</div>
+                  <span className="text-cocoa font-extrabold font-mono bg-rose-light/50 px-2 py-1 rounded-md">
+                    {p.sold} sold
                   </span>
                 </div>
               ))}
+              {topSellingProducts.length === 0 && (
+                <p className="text-sm text-ink-soft">No orders yet.</p>
+              )}
             </div>
           </div>
 

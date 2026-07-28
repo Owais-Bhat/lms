@@ -28,6 +28,7 @@ export type Order = {
 
 type OrderState = {
   orders: Order[];
+  loaded: boolean;
   fetchOrdersFromSupabase: () => Promise<void>;
   createOrder: (orderData: Omit<Order, "id" | "orderNumber" | "createdAt" | "status">) => Promise<Order>;
   updateStatus: (orderId: string, status: OrderStatus) => Promise<void>;
@@ -35,44 +36,11 @@ type OrderState = {
   clearOrders: () => void;
 };
 
-const mockInitialOrders: Order[] = [
-  {
-    id: "ord-101",
-    orderNumber: "#BS-8901",
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    customer: {
-      name: "Ayesha Malik",
-      email: "ayesha@example.com",
-      phone: "+91 98123 45678",
-      address: "14 Rose Avenue, Sector 5, City",
-      notes: "Please write 'Happy Birthday Sahil' on top",
-    },
-    items: [
-      {
-        lineId: "p1-1",
-        productId: "p1",
-        slug: "strawberry-delight",
-        name: "Strawberry Delight Cake",
-        illustration: "slice-berry",
-        image: "/images/products/strawberry-delight.jpg",
-        weightLabel: "1.0kg",
-        unitPrice: 35,
-        quantity: 1,
-        addOns: [{ id: "a1", name: "Sparkler Candles", price: 3 }],
-      },
-    ],
-    subtotal: 38,
-    deliveryFee: 0,
-    total: 38,
-    paymentMethod: "UPI / Online",
-    status: "Baking",
-  },
-];
-
 export const useOrderStore = create<OrderState>()(
   persist(
     (set, get) => ({
-      orders: mockInitialOrders,
+      orders: [],
+      loaded: false,
 
       fetchOrdersFromSupabase: async () => {
         const fetched = await supabaseDb.select<any>("orders", "*");
@@ -94,7 +62,9 @@ export const useOrderStore = create<OrderState>()(
             paymentMethod: row.payment_method,
             status: row.status as OrderStatus,
           }));
-          set({ orders: formatted });
+          set({ orders: formatted, loaded: true });
+        } else {
+          set({ loaded: true });
         }
       },
 

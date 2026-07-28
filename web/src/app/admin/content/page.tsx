@@ -38,6 +38,9 @@ export default function AdminContentPage() {
 
       {tab === "Reviews" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {reviews.length === 0 && (
+            <p className="text-sm text-ink-soft col-span-full">No reviews submitted yet.</p>
+          )}
           {reviews.map((r) => (
             <div key={r.id} className="neu-raised rounded-3xl p-5">
               <div className="flex items-center justify-between mb-2">
@@ -91,11 +94,15 @@ export default function AdminContentPage() {
               ))}
             </tbody>
           </table>
+          {blogPosts.length === 0 && (
+            <p className="text-sm text-ink-soft p-6 text-center">No blog posts yet.</p>
+          )}
         </div>
       )}
 
       {tab === "FAQ" && (
         <div className="flex flex-col gap-3">
+          {faqEntries.length === 0 && <p className="text-sm text-ink-soft">No FAQ entries yet.</p>}
           {faqEntries.map((f) => (
             <div key={f.id} className="neu-raised rounded-2xl p-5">
               <div className="text-xs font-bold text-cocoa uppercase tracking-wide mb-1">{f.category}</div>
@@ -125,6 +132,9 @@ export default function AdminContentPage() {
                   <Badge tone="positive">Featured</Badge>
                 </div>
               ))}
+            {reviews.filter((r) => r.status === "Approved").length === 0 && (
+              <p className="text-sm text-ink-soft">No approved reviews yet.</p>
+            )}
           </div>
         </div>
       )}

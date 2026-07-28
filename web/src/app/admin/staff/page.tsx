@@ -1,42 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { Plus, UserPlus, X, Check, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { adminUsers as initialUsers, auditLog } from "@/lib/admin-data";
 import { supabaseDb } from "@/lib/supabase";
 
 const tabs = ["Admin Users", "Audit Log"] as const;
 
+type AdminUserRow = {
+  id: string;
+  username: string;
+  role: string;
+  created_at?: string;
+};
+
 export default function AdminStaffPage() {
   const [tab, setTab] = useState<(typeof tabs)[number]>("Admin Users");
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState<AdminUserRow[]>([]);
 
   const [showModal, setShowModal] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("Store Manager");
 
+  async function fetchUsers() {
+    const rows = await supabaseDb.select<AdminUserRow>("admin_users", "*");
+    if (rows) setUsers(rows);
+  }
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   async function handleInvite(e: React.FormEvent) {
     e.preventDefault();
-    const newUser = {
-      id: `u-${Date.now()}`,
-      name,
-      email,
-      role,
-      lastActive: "Just now",
-    };
+    const username = email.split("@")[0] || name.toLowerCase().replace(/\s+/g, ".");
 
     // Save staff member to Supabase admin_users table
     await supabaseDb.insert("admin_users", {
-      id: newUser.id,
-      username: email.split("@")[0],
-      password: "Awais111@9149@",
-      role: newUser.role,
+      id: `u-${Date.now()}`,
+      username,
+      password: "changeme",
+      role,
     });
 
-    setUsers([newUser, ...users]);
+    await fetchUsers();
     setShowModal(false);
     setName("");
     setEmail("");
@@ -75,43 +84,40 @@ export default function AdminStaffPage() {
 
       {tab === "Admin Users" ? (
         <div className="neu-raised rounded-3xl overflow-x-auto">
-          <table className="w-full text-sm min-w-[700px]">
+          <table className="w-full text-sm min-w-[600px]">
             <thead>
               <tr className="text-left text-xs text-ink-soft border-b border-ink/5">
-                <th className="p-4 font-bold">Name</th>
-                <th className="p-4 font-bold">Email Address</th>
+                <th className="p-4 font-bold">Username</th>
                 <th className="p-4 font-bold">Assigned Role</th>
-                <th className="p-4 font-bold">Last Active</th>
+                <th className="p-4 font-bold">Added</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className="border-b border-ink/5 last:border-0 hover:bg-cocoa/5">
-                  <td className="p-4 font-bold text-ink">{u.name}</td>
-                  <td className="p-4 text-ink-soft">{u.email}</td>
+                  <td className="p-4 font-bold text-ink">{u.username}</td>
                   <td className="p-4">
                     <span className="neu-inset rounded-full px-3 py-1 text-xs font-bold text-cocoa">
                       {u.role}
                     </span>
                   </td>
-                  <td className="p-4 text-ink-soft font-semibold">{u.lastActive}</td>
+                  <td className="p-4 text-ink-soft font-semibold">
+                    {u.created_at ? new Date(u.created_at).toLocaleDateString() : "—"}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {users.length === 0 && (
+            <p className="text-sm text-ink-soft p-6 text-center">No admin users found.</p>
+          )}
         </div>
       ) : (
         <div className="neu-raised rounded-3xl p-6 space-y-3">
           <div className="text-sm font-bold text-ink mb-2">System Audit Log</div>
-          {auditLog.map((log, i) => (
-            <div key={i} className="neu-raised-sm rounded-2xl p-4 flex justify-between items-center text-xs">
-              <div>
-                <span className="font-bold text-ink">{log.user}</span>{" "}
-                <span className="text-ink-soft">{log.action}</span>
-              </div>
-              <span className="text-[11px] font-mono text-cocoa font-bold">{log.time}</span>
-            </div>
-          ))}
+          <p className="text-sm text-ink-soft">
+            Activity logging isn&apos;t wired up yet — this will show a live trail of admin actions once implemented.
+          </p>
         </div>
       )}
 

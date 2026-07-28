@@ -1,23 +1,36 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Ban, Gift, MapPin } from "lucide-react";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/admin/Badge";
-import { adminCustomers, adminOrders } from "@/lib/admin-data";
+import { Gift, MapPin } from "lucide-react";
+import { useOrderStore } from "@/store/order-store";
+import { deriveCustomers } from "@/lib/derive-customers";
 
 export default function AdminCustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const customer = adminCustomers.find((c) => c.id === id);
-  const [note, setNote] = useState("");
-  const [notes, setNotes] = useState<string[]>(["Prefers eggless options. Called once about a late delivery."]);
-  const [blocked, setBlocked] = useState(customer?.blocked ?? false);
+  const { orders, fetchOrdersFromSupabase, loaded } = useOrderStore();
 
-  if (!customer) notFound();
+  useEffect(() => {
+    fetchOrdersFromSupabase();
+  }, [fetchOrdersFromSupabase]);
 
-  const orders = adminOrders.filter((o) => o.customer === customer.name);
+  const customers = useMemo(() => deriveCustomers(orders), [orders]);
+  const customer = customers.find((c) => c.id === id);
+
+  const customerOrders = useMemo(
+    () =>
+      orders.filter((o) => {
+        const key = o.customer.email || o.customer.phone || o.customer.name;
+        return encodeURIComponent(key) === id;
+      }),
+    [orders, id]
+  );
+
+  if (!customer) {
+    if (!loaded) return null;
+    notFound();
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl">
@@ -25,13 +38,7 @@ export default function AdminCustomerDetailPage({ params }: { params: Promise<{ 
         <div className="text-xs text-ink-soft mb-1">
           <Link href="/admin/customers">Customers</Link> / {customer.name}
         </div>
-        <div className="flex items-center justify-between flex-wrap gap-3">
-          <h1 className="font-serif text-3xl text-ink">{customer.name}</h1>
-          <Button variant="ghost" size="sm" onClick={() => setBlocked((b) => !b)}>
-            <Ban size={14} /> {blocked ? "Unblock Customer" : "Block Customer"}
-          </Button>
-        </div>
-        {blocked && <Badge tone="negative">Blocked</Badge>}
+        <h1 className="font-serif text-3xl text-ink">{customer.name}</h1>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -44,9 +51,9 @@ export default function AdminCustomerDetailPage({ params }: { params: Promise<{ 
           <div className="text-xs text-ink-soft">Lifetime Value</div>
         </div>
         <div className="neu-raised rounded-3xl p-5">
-          <div className="text-2xl font-bold text-ink">{customer.loyaltyPoints}</div>
+          <div className="text-2xl font-bold text-ink">{new Date(customer.joined).toLocaleDateString()}</div>
           <div className="text-xs text-ink-soft flex items-center gap-1">
-            <Gift size={12} /> Loyalty Points
+            <Gift size={12} /> First Order
           </div>
         </div>
       </div>
@@ -55,13 +62,13 @@ export default function AdminCustomerDetailPage({ params }: { params: Promise<{ 
         <div className="neu-raised rounded-3xl p-6">
           <div className="text-sm font-bold text-ink mb-4">Order History</div>
           <div className="flex flex-col gap-3">
-            {orders.length === 0 && <p className="text-sm text-ink-soft">No orders yet.</p>}
-            {orders.map((o) => (
+            {customerOrders.length === 0 && <p className="text-sm text-ink-soft">No orders yet.</p>}
+            {customerOrders.map((o) => (
               <div key={o.id} className="flex items-center justify-between text-sm border-b border-ink/5 pb-3 last:border-0">
                 <Link href={`/admin/orders/${o.id}`} className="font-semibold text-cocoa">
-                  {o.id}
+                  {o.orderNumber}
                 </Link>
-                <span className="text-ink-soft">{o.deliveryDate}</span>
+                <span className="text-ink-soft">{new Date(o.createdAt).toLocaleDateString()}</span>
                 <span className="font-semibold text-ink">${o.total.toFixed(2)}</span>
               </div>
             ))}
@@ -71,38 +78,21 @@ export default function AdminCustomerDetailPage({ params }: { params: Promise<{ 
         <div className="flex flex-col gap-6">
           <div className="neu-raised rounded-3xl p-6">
             <div className="text-sm font-bold text-ink mb-3 flex items-center gap-2">
-              <MapPin size={14} /> Address
+              <MapPin size={14} /> Addresses
             </div>
-            <p className="text-sm text-ink-soft">{customer.addresses[0]}</p>
+            {customer.addresses.length === 0 ? (
+              <p className="text-sm text-ink-soft">No address on file.</p>
+            ) : (
+              customer.addresses.map((addr) => (
+                <p key={addr} className="text-sm text-ink-soft">{addr}</p>
+              ))
+            )}
           </div>
 
           <div className="neu-raised rounded-3xl p-6">
-            <div className="text-sm font-bold text-ink mb-3">Internal Notes</div>
-            <div className="flex flex-col gap-2 mb-3">
-              {notes.map((n, i) => (
-                <div key={i} className="neu-inset rounded-xl p-3 text-xs text-ink-soft">
-                  {n}
-                </div>
-              ))}
-            </div>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Add a note..."
-              rows={2}
-              className="neu-inset rounded-xl px-3 py-2 text-sm w-full outline-none resize-none mb-2"
-            />
-            <Button
-              size="sm"
-              onClick={() => {
-                if (note.trim()) {
-                  setNotes((n) => [...n, note.trim()]);
-                  setNote("");
-                }
-              }}
-            >
-              Add Note
-            </Button>
+            <div className="text-sm font-bold text-ink mb-3">Contact</div>
+            <p className="text-sm text-ink-soft">{customer.email || "No email"}</p>
+            <p className="text-sm text-ink-soft">{customer.phone || "No phone"}</p>
           </div>
         </div>
       </div>

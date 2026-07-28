@@ -138,11 +138,17 @@ export default function AdminLogisticsPage() {
               ))}
             </tbody>
           </table>
+          {deliveryZones.length === 0 && (
+            <p className="text-sm text-ink-soft p-6 text-center">No delivery zones configured yet.</p>
+          )}
         </div>
       )}
 
       {tab === "Riders" && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {ridersList.length === 0 && (
+            <p className="text-sm text-ink-soft col-span-full">No riders added yet.</p>
+          )}
           {ridersList.map((r) => (
             <div key={r.id} className="neu-raised rounded-3xl p-5 flex flex-col justify-between">
               <div>
@@ -164,6 +170,7 @@ export default function AdminLogisticsPage() {
       {tab === "Time Slots" && (
         <div className="neu-raised rounded-3xl p-6 space-y-3">
           <div className="text-sm font-bold text-ink mb-3">Serviceable Delivery Windows</div>
+          {timeSlots.length === 0 && <p className="text-sm text-ink-soft">No delivery windows configured yet.</p>}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {timeSlots.map((ts) => (
               <div key={ts.slot} className="neu-raised-sm rounded-2xl p-4 flex justify-between items-center">

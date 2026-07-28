@@ -98,6 +98,9 @@ export default function AdminMarketingPage() {
               ))}
             </tbody>
           </table>
+          {couponList.length === 0 && (
+            <p className="text-sm text-ink-soft p-6 text-center">No coupons yet — create one to get started.</p>
+          )}
         </div>
       )}
 
@@ -112,6 +115,9 @@ export default function AdminMarketingPage() {
               <p className="text-xs text-ink-soft">{b.subtitle}</p>
             </div>
           ))}
+          {banners.length === 0 && (
+            <p className="text-sm text-ink-soft">No promotional banners configured yet.</p>
+          )}
         </div>
       )}
 
@@ -129,6 +135,9 @@ export default function AdminMarketingPage() {
               </div>
             ))}
           </div>
+          {campaigns.length === 0 && (
+            <p className="text-sm text-ink-soft">No marketing campaigns running yet.</p>
+          )}
         </div>
       )}
 

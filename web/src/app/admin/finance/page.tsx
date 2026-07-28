@@ -1,21 +1,26 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import clsx from "clsx";
 import { CreditCard } from "lucide-react";
 import { Badge } from "@/components/admin/Badge";
-import { transactions } from "@/lib/admin-data";
+import { useOrderStore } from "@/store/order-store";
 
 const tabs = ["Gateways", "Transactions", "Tax", "Invoices"] as const;
 
 const gateways = [
-  { name: "Stripe", enabled: true, mode: "Live" },
-  { name: "Razorpay", enabled: true, mode: "Live" },
-  { name: "PayPal", enabled: false, mode: "Test" },
+  { name: "Stripe", enabled: false, mode: "Not connected" },
+  { name: "Razorpay", enabled: false, mode: "Not connected" },
+  { name: "PayPal", enabled: false, mode: "Not connected" },
 ];
 
 export default function AdminFinancePage() {
   const [tab, setTab] = useState<(typeof tabs)[number]>("Gateways");
+  const { orders, fetchOrdersFromSupabase } = useOrderStore();
+
+  useEffect(() => {
+    fetchOrdersFromSupabase();
+  }, [fetchOrdersFromSupabase]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -68,20 +73,25 @@ export default function AdminFinancePage() {
               </tr>
             </thead>
             <tbody>
-              {transactions.map((t) => (
-                <tr key={t.id} className="border-b border-ink/5 last:border-0">
-                  <td className="p-4 font-mono text-ink-soft text-xs">{t.id}</td>
-                  <td className="p-4 font-semibold text-cocoa">{t.orderId}</td>
-                  <td className="p-4 font-semibold text-ink">${t.amount.toFixed(2)}</td>
-                  <td className="p-4 text-ink-soft">{t.method}</td>
-                  <td className="p-4 text-ink-soft">{t.date}</td>
+              {orders.map((o) => (
+                <tr key={o.id} className="border-b border-ink/5 last:border-0">
+                  <td className="p-4 font-mono text-ink-soft text-xs">{o.id}</td>
+                  <td className="p-4 font-semibold text-cocoa">{o.orderNumber}</td>
+                  <td className="p-4 font-semibold text-ink">${o.total.toFixed(2)}</td>
+                  <td className="p-4 text-ink-soft">{o.paymentMethod}</td>
+                  <td className="p-4 text-ink-soft">{new Date(o.createdAt).toLocaleDateString()}</td>
                   <td className="p-4">
-                    <Badge tone={t.status === "Success" ? "positive" : "negative"}>{t.status}</Badge>
+                    <Badge tone={o.status === "Cancelled" ? "negative" : "positive"}>
+                      {o.status === "Cancelled" ? "Refunded" : "Success"}
+                    </Badge>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {orders.length === 0 && (
+            <p className="text-sm text-ink-soft p-6 text-center">No transactions yet.</p>
+          )}
         </div>
       )}
 

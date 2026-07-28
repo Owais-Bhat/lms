@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -8,28 +8,39 @@ import { Check, MapPin, Printer, RotateCcw } from "lucide-react";
 import clsx from "clsx";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/admin/Badge";
-import { adminOrders, ridersList } from "@/lib/admin-data";
+import { useOrderStore, type OrderStatus } from "@/store/order-store";
 
-const steps = ["Pending", "Confirmed", "Baking", "Out for Delivery", "Delivered"];
+const steps: OrderStatus[] = ["Pending", "Baking", "Out for Delivery", "Delivered"];
 
 export default function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const order = adminOrders.find((o) => o.id === id);
-  const [status, setStatus] = useState(order?.status ?? "Pending");
-  const [rider, setRider] = useState(order?.rider ?? "Unassigned");
+  const { orders, fetchOrdersFromSupabase, updateStatus, loaded } = useOrderStore();
+  const [rider, setRider] = useState("Unassigned");
 
-  if (!order) notFound();
+  useEffect(() => {
+    fetchOrdersFromSupabase();
+  }, [fetchOrdersFromSupabase]);
 
+  const order = orders.find((o) => o.id === id);
+
+  if (!order) {
+    if (!loaded) return null;
+    notFound();
+  }
+
+  const status = order.status;
   const stepIdx = Math.max(0, steps.indexOf(status === "Cancelled" ? "Pending" : status));
+  const isPickup = order.customer.address === "Store Pickup";
+  const paymentStatus = status === "Cancelled" ? "Refunded" : "Paid";
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <div className="text-xs text-ink-soft mb-1">
-            <Link href="/admin/orders">Orders</Link> / {order.id}
+            <Link href="/admin/orders">Orders</Link> / {order.orderNumber}
           </div>
-          <h1 className="font-serif text-3xl text-ink">{order.id}</h1>
+          <h1 className="font-serif text-3xl text-ink">{order.orderNumber}</h1>
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm">
@@ -42,7 +53,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setStatus("Cancelled")}
+              onClick={() => updateStatus(order.id, "Cancelled")}
             >
               Cancel Order
             </Button>
@@ -63,7 +74,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                   />
                 )}
                 <button
-                  onClick={() => setStatus(s as typeof status)}
+                  onClick={() => updateStatus(order.id, s)}
                   className={clsx(
                     "w-10 h-10 rounded-full flex items-center justify-center mb-2 neu-pressable",
                     i <= stepIdx ? "neu-inset text-cocoa" : "neu-raised-sm text-ink-soft"
@@ -90,19 +101,28 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
               {order.items.map((item, i) => (
                 <div key={i} className="flex gap-4">
                   <div className="neu-inset rounded-xl w-16 h-16 p-1 shrink-0 relative overflow-hidden">
-                    <Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover rounded-lg" />
+                    <Image
+                      src={item.image || "/images/products/wedding-tiered-elegance.jpg"}
+                      alt={item.name}
+                      fill
+                      sizes="64px"
+                      className="object-cover rounded-lg"
+                    />
                   </div>
                   <div className="flex-1">
                     <div className="font-semibold text-ink">
-                      {item.qty}× {item.name}
+                      {item.quantity}× {item.name}
                     </div>
-                    {item.customization && (
-                      <div className="text-xs text-ink-soft mt-0.5">Message: {item.customization}</div>
-                    )}
+                    <div className="text-xs text-ink-soft mt-0.5">{item.weightLabel}</div>
                   </div>
                 </div>
               ))}
             </div>
+            {order.customer.notes && (
+              <div className="text-xs text-ink-soft mt-3 pt-3 border-t border-ink/10">
+                Note: {order.customer.notes}
+              </div>
+            )}
             <div className="border-t border-ink/10 mt-4 pt-4 flex justify-between font-bold text-ink">
               <span>Total</span>
               <span>${order.total.toFixed(2)}</span>
@@ -110,14 +130,18 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
           </div>
 
           <div className="neu-raised rounded-3xl p-6">
-            <div className="text-sm font-bold text-ink mb-4">Audit Trail</div>
+            <div className="text-sm font-bold text-ink mb-4">Timeline</div>
             <div className="flex flex-col gap-3">
-              {order.auditTrail.map((a, i) => (
-                <div key={i} className="flex gap-3 text-sm">
-                  <span className="text-ink-soft w-32 shrink-0">{a.at}</span>
-                  <span className="text-ink">{a.event}</span>
-                </div>
-              ))}
+              <div className="flex gap-3 text-sm">
+                <span className="text-ink-soft w-40 shrink-0">
+                  {new Date(order.createdAt).toLocaleString()}
+                </span>
+                <span className="text-ink">Order placed</span>
+              </div>
+              <div className="flex gap-3 text-sm">
+                <span className="text-ink-soft w-40 shrink-0">Current status</span>
+                <span className="text-ink">{order.status}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -125,18 +149,17 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
         <div className="flex flex-col gap-6">
           <div className="neu-raised rounded-3xl p-6">
             <div className="text-sm font-bold text-ink mb-3">Customer</div>
-            <div className="text-sm text-ink font-semibold">{order.customer}</div>
-            <div className="text-xs text-ink-soft">{order.email}</div>
+            <div className="text-sm text-ink font-semibold">{order.customer.name}</div>
+            <div className="text-xs text-ink-soft">{order.customer.email}</div>
+            <div className="text-xs text-ink-soft">{order.customer.phone}</div>
           </div>
 
           <div className="neu-raised rounded-3xl p-6">
             <div className="text-sm font-bold text-ink mb-3">Delivery</div>
             <div className="flex items-start gap-2 text-sm text-ink-soft mb-3">
               <MapPin size={14} className="mt-0.5 shrink-0 text-cocoa" />
-              {order.deliveryType === "Pickup" ? "Store Pickup" : order.address}
+              {isPickup ? "Store Pickup" : order.customer.address}
             </div>
-            <div className="text-xs text-ink-soft mb-1">Slot</div>
-            <div className="text-sm text-ink mb-3">{order.deliverySlot}</div>
             <div className="text-xs text-ink-soft mb-1">Assigned Rider</div>
             <select
               value={rider}
@@ -144,9 +167,6 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
               className="neu-inset rounded-full px-4 py-2 text-sm w-full outline-none"
             >
               <option>Unassigned</option>
-              {ridersList.map((r) => (
-                <option key={r.id}>{r.name}</option>
-              ))}
             </select>
           </div>
 
@@ -158,7 +178,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             </div>
             <div className="flex justify-between text-sm mb-4">
               <span className="text-ink-soft">Status</span>
-              <StatusBadge status={order.paymentStatus} />
+              <StatusBadge status={paymentStatus} />
             </div>
             <Button variant="ghost" size="sm" className="w-full">
               <RotateCcw size={14} /> Issue Refund

@@ -1,14 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { topProducts } from "@/lib/admin-data";
+import { useOrderStore } from "@/store/order-store";
+import { deriveCustomers } from "@/lib/derive-customers";
 
 const reportTypes = ["Sales", "Products", "Customers", "Delivery", "Marketing"] as const;
 
 export default function AdminAnalyticsPage() {
   const [report, setReport] = useState<(typeof reportTypes)[number]>("Sales");
+  const { orders, fetchOrdersFromSupabase } = useOrderStore();
+
+  useEffect(() => {
+    fetchOrdersFromSupabase();
+  }, [fetchOrdersFromSupabase]);
+
+  const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
+  const completedOrders = orders.filter((o) => o.status !== "Cancelled").length;
+
+  const topProducts = useMemo(() => {
+    const sold: Record<string, { sold: number; revenue: number }> = {};
+    orders.forEach((o) => {
+      o.items.forEach((item) => {
+        const entry = sold[item.name] ?? { sold: 0, revenue: 0 };
+        entry.sold += item.quantity;
+        entry.revenue += item.unitPrice * item.quantity;
+        sold[item.name] = entry;
+      });
+    });
+    return Object.entries(sold)
+      .map(([name, v]) => ({ name, ...v }))
+      .sort((a, b) => b.sold - a.sold);
+  }, [orders]);
+
+  const customers = useMemo(() => deriveCustomers(orders), [orders]);
+  const repeatCustomers = customers.filter((c) => c.orders > 1).length;
+  const repeatRate = customers.length > 0 ? Math.round((repeatCustomers / customers.length) * 100) : 0;
+
+  const trend = useMemo(() => {
+    const days: { label: string; value: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dayTotal = orders
+        .filter((o) => new Date(o.createdAt).toDateString() === d.toDateString())
+        .reduce((sum, o) => sum + o.total, 0);
+      days.push({ label: d.toLocaleDateString(undefined, { weekday: "short" }), value: dayTotal });
+    }
+    return days;
+  }, [orders]);
+  const maxTrend = Math.max(1, ...trend.map((d) => d.value));
 
   return (
     <div className="flex flex-col gap-6">
@@ -43,81 +85,99 @@ export default function AdminAnalyticsPage() {
 
       <div className="neu-raised rounded-3xl p-6">
         <div className="font-serif text-xl text-ink mb-6">{report} Report</div>
-        <div className="flex items-end gap-3 h-40 mb-6">
-          {[62, 78, 45, 90, 71, 55, 84].map((v, i) => (
-            <div key={i} className="flex-1 neu-raised-sm rounded-t-lg" style={{ height: `${v}%`, background: "linear-gradient(180deg, #E7B6A4, #6B3A2F)" }} />
-          ))}
-        </div>
+
+        {(report === "Sales" || report === "Products") && (
+          <div className="flex items-end gap-3 h-40 mb-6">
+            {trend.map((d, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                <div
+                  className="w-full neu-raised-sm rounded-t-lg"
+                  style={{ height: `${Math.max(2, (d.value / maxTrend) * 100)}%`, background: "linear-gradient(180deg, #E7B6A4, #6B3A2F)" }}
+                />
+                <span className="text-[10px] text-ink-soft font-semibold">{d.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="overflow-x-auto">
-          <table className="w-full text-sm min-w-[500px]">
-            <thead>
-              <tr className="text-left text-xs text-ink-soft border-b border-ink/5">
-                <th className="p-3">Metric</th>
-                <th className="p-3">This Period</th>
-                <th className="p-3">Previous Period</th>
-                <th className="p-3">Change</th>
-              </tr>
-            </thead>
-            <tbody>
-              {report === "Sales" && (
-                <>
-                  <tr className="border-b border-ink/5">
-                    <td className="p-3 text-ink">Total Revenue</td>
-                    <td className="p-3 font-semibold text-ink">$18,420</td>
-                    <td className="p-3 text-ink-soft">$16,120</td>
-                    <td className="p-3 text-cocoa font-semibold">+14.3%</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-ink">Orders Completed</td>
-                    <td className="p-3 font-semibold text-ink">412</td>
-                    <td className="p-3 text-ink-soft">378</td>
-                    <td className="p-3 text-cocoa font-semibold">+9.0%</td>
-                  </tr>
-                </>
-              )}
-              {report === "Products" &&
-                topProducts.map((p) => (
+          {report === "Sales" && (
+            <table className="w-full text-sm min-w-[400px]">
+              <thead>
+                <tr className="text-left text-xs text-ink-soft border-b border-ink/5">
+                  <th className="p-3">Metric</th>
+                  <th className="p-3">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-ink/5">
+                  <td className="p-3 text-ink">Total Revenue</td>
+                  <td className="p-3 font-semibold text-ink">${totalRevenue.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td className="p-3 text-ink">Orders Completed</td>
+                  <td className="p-3 font-semibold text-ink">{completedOrders}</td>
+                </tr>
+              </tbody>
+            </table>
+          )}
+
+          {report === "Products" && (
+            <table className="w-full text-sm min-w-[500px]">
+              <thead>
+                <tr className="text-left text-xs text-ink-soft border-b border-ink/5">
+                  <th className="p-3">Product</th>
+                  <th className="p-3">Units Sold</th>
+                  <th className="p-3">Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topProducts.map((p) => (
                   <tr key={p.name} className="border-b border-ink/5 last:border-0">
                     <td className="p-3 text-ink">{p.name}</td>
                     <td className="p-3 font-semibold text-ink">{p.sold} sold</td>
-                    <td className="p-3 text-ink-soft">${p.revenue}</td>
-                    <td className="p-3 text-cocoa font-semibold">—</td>
+                    <td className="p-3 text-ink-soft">${p.revenue.toFixed(2)}</td>
                   </tr>
                 ))}
-              {report === "Customers" && (
-                <>
-                  <tr className="border-b border-ink/5">
-                    <td className="p-3 text-ink">Repeat Purchase Rate</td>
-                    <td className="p-3 font-semibold text-ink">38%</td>
-                    <td className="p-3 text-ink-soft">34%</td>
-                    <td className="p-3 text-cocoa font-semibold">+4pp</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 text-ink">Cart Abandonment</td>
-                    <td className="p-3 font-semibold text-ink">61%</td>
-                    <td className="p-3 text-ink-soft">64%</td>
-                    <td className="p-3 text-cocoa font-semibold">-3pp</td>
-                  </tr>
-                </>
-              )}
-              {report === "Delivery" && (
-                <tr>
-                  <td className="p-3 text-ink">On-Time Delivery Rate</td>
-                  <td className="p-3 font-semibold text-ink">94%</td>
-                  <td className="p-3 text-ink-soft">91%</td>
-                  <td className="p-3 text-cocoa font-semibold">+3pp</td>
+              </tbody>
+            </table>
+          )}
+          {report === "Products" && topProducts.length === 0 && (
+            <p className="text-sm text-ink-soft py-4">No sales data yet.</p>
+          )}
+
+          {report === "Customers" && (
+            <table className="w-full text-sm min-w-[400px]">
+              <thead>
+                <tr className="text-left text-xs text-ink-soft border-b border-ink/5">
+                  <th className="p-3">Metric</th>
+                  <th className="p-3">Value</th>
                 </tr>
-              )}
-              {report === "Marketing" && (
-                <tr>
-                  <td className="p-3 text-ink">Coupon ROI</td>
-                  <td className="p-3 font-semibold text-ink">4.2x</td>
-                  <td className="p-3 text-ink-soft">3.7x</td>
-                  <td className="p-3 text-cocoa font-semibold">+0.5x</td>
+              </thead>
+              <tbody>
+                <tr className="border-b border-ink/5">
+                  <td className="p-3 text-ink">Total Customers</td>
+                  <td className="p-3 font-semibold text-ink">{customers.length}</td>
                 </tr>
-              )}
-            </tbody>
-          </table>
+                <tr>
+                  <td className="p-3 text-ink">Repeat Purchase Rate</td>
+                  <td className="p-3 font-semibold text-ink">{repeatRate}%</td>
+                </tr>
+              </tbody>
+            </table>
+          )}
+
+          {report === "Delivery" && (
+            <p className="text-sm text-ink-soft py-4">
+              Delivery timing analytics require dispatch/delivery timestamps, which aren&apos;t tracked yet.
+            </p>
+          )}
+
+          {report === "Marketing" && (
+            <p className="text-sm text-ink-soft py-4">
+              Coupon and campaign attribution isn&apos;t tracked yet — this report will populate once that&apos;s wired up.
+            </p>
+          )}
         </div>
       </div>
     </div>

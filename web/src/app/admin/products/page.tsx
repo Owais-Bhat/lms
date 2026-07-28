@@ -213,7 +213,7 @@ export default function AdminProductsPage() {
                       </div>
                     </td>
                     <td className="p-4 text-ink-soft capitalize font-semibold">{p.category}</td>
-                    <td className="p-4 font-extrabold text-cocoa">${p.price.toFixed(2)}</td>
+                    <td className="p-4 font-extrabold text-cocoa">₹{p.price.toFixed(2)}</td>
                     <td className="p-4">
                       <span className="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2.5 py-1 rounded-full">
                         In Stock
@@ -312,7 +312,7 @@ export default function AdminProductsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-cocoa uppercase mb-1">Price ($)</label>
+                  <label className="block text-xs font-bold text-cocoa uppercase mb-1">Price (₹)</label>
                   <input
                     type="number"
                     step="0.01"

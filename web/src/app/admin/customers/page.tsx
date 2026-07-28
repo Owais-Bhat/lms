@@ -54,7 +54,7 @@ export default function AdminCustomersPage() {
                   <div className="text-xs text-ink-soft">{c.email || c.phone}</div>
                 </td>
                 <td className="p-4 text-ink">{c.orders}</td>
-                <td className="p-4 font-semibold text-ink">${c.ltv.toFixed(2)}</td>
+                <td className="p-4 font-semibold text-ink">₹{c.ltv.toFixed(2)}</td>
                 <td className="p-4 text-ink-soft">{new Date(c.joined).toLocaleDateString()}</td>
               </tr>
             ))}

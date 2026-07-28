@@ -112,7 +112,7 @@ export default function AdminAnalyticsPage() {
               <tbody>
                 <tr className="border-b border-ink/5">
                   <td className="p-3 text-ink">Total Revenue</td>
-                  <td className="p-3 font-semibold text-ink">${totalRevenue.toFixed(2)}</td>
+                  <td className="p-3 font-semibold text-ink">₹{totalRevenue.toFixed(2)}</td>
                 </tr>
                 <tr>
                   <td className="p-3 text-ink">Orders Completed</td>
@@ -136,7 +136,7 @@ export default function AdminAnalyticsPage() {
                   <tr key={p.name} className="border-b border-ink/5 last:border-0">
                     <td className="p-3 text-ink">{p.name}</td>
                     <td className="p-3 font-semibold text-ink">{p.sold} sold</td>
-                    <td className="p-3 text-ink-soft">${p.revenue.toFixed(2)}</td>
+                    <td className="p-3 text-ink-soft">₹{p.revenue.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -46,7 +46,7 @@ export default function AccountOverviewPage() {
           <span className="neu-inset rounded-full px-3 py-1 text-xs font-semibold text-cocoa">
             {latest.status}
           </span>
-          <div className="font-bold text-ink">${latest.total.toFixed(2)}</div>
+          <div className="font-bold text-ink">₹{latest.total.toFixed(2)}</div>
         </div>
       </div>
     </div>

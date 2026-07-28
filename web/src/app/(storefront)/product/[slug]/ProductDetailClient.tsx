@@ -144,7 +144,7 @@ export function ProductDetailClient({ product: initialProduct }: { product: Prod
           </div>
           <p className="text-ink-soft mb-6">{product.description}</p>
 
-          <div className="text-3xl font-bold text-cocoa mb-6">${total.toFixed(2)}</div>
+          <div className="text-3xl font-bold text-cocoa mb-6">₹{total.toFixed(2)}</div>
 
           <div className="mb-6">
             <div className="text-sm font-bold text-ink mb-2">Weight / Size</div>
@@ -193,7 +193,7 @@ export function ProductDetailClient({ product: initialProduct }: { product: Prod
                       </span>
                       {a.name}
                     </span>
-                    <span className="text-ink-soft">+${a.price.toFixed(2)}</span>
+                    <span className="text-ink-soft">+₹{a.price.toFixed(2)}</span>
                   </label>
                 );
               })}
@@ -257,7 +257,7 @@ export function ProductDetailClient({ product: initialProduct }: { product: Prod
                     {s.label}
                   </span>
                   {s.surcharge > 0 && (
-                    <span className="text-ink-soft">+${s.surcharge.toFixed(2)}</span>
+                    <span className="text-ink-soft">+₹{s.surcharge.toFixed(2)}</span>
                   )}
                 </label>
               ))}

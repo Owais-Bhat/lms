@@ -25,7 +25,7 @@ export function ProductCard({ product }: { product: Product }) {
           />
         </div>
         <span className="absolute -top-2 -right-2 bg-cocoa text-[#fff6ec] text-xs font-bold px-3 py-1.5 rounded-full shadow-md">
-          ${product.price.toFixed(2)}
+          ₹{product.price.toFixed(2)}
         </span>
         {product.badge && (
           <span className="absolute top-2 left-2 bg-rose text-cocoa text-[10px] font-bold px-2 py-1 rounded-full">

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo } from "react";
 import Link from "next/link";
-import { DollarSign, Palette, ShoppingBag, TrendingUp, UserPlus } from "lucide-react";
+import { IndianRupee, Palette, ShoppingBag, TrendingUp, UserPlus } from "lucide-react";
 import { StatCard } from "@/components/admin/StatCard";
 import { useOrderStore } from "@/store/order-store";
 
@@ -84,12 +84,12 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        <StatCard icon={DollarSign} label="Total Revenue" value={`$${totalRevenue.toFixed(2)}`} />
+        <StatCard icon={IndianRupee} label="Total Revenue" value={`₹${totalRevenue.toFixed(2)}`} />
         <StatCard icon={ShoppingBag} label="Total Orders" value={String(totalOrdersCount)} />
         <StatCard
           icon={TrendingUp}
           label="Avg Order Value"
-          value={`$${(totalOrdersCount > 0 ? totalRevenue / totalOrdersCount : 0).toFixed(2)}`}
+          value={`₹${(totalOrdersCount > 0 ? totalRevenue / totalOrdersCount : 0).toFixed(2)}`}
         />
         <StatCard icon={UserPlus} label="Unique Customers" value={String(uniqueCustomers)} />
       </div>
@@ -172,7 +172,7 @@ export default function AdminDashboardPage() {
                   <tr key={o.id} className="border-b border-ink/5 last:border-0 hover:bg-cocoa/5">
                     <td className="py-3 font-bold font-mono text-cocoa">{o.orderNumber}</td>
                     <td className="py-3 text-ink font-semibold">{o.customer.name}</td>
-                    <td className="py-3 font-extrabold text-ink">${o.total.toFixed(2)}</td>
+                    <td className="py-3 font-extrabold text-ink">₹{o.total.toFixed(2)}</td>
                     <td className="py-3">
                       <span className="neu-raised-sm rounded-full px-2.5 py-1 text-[11px] font-bold text-cocoa">
                         {o.status}

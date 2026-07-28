@@ -127,7 +127,7 @@ export default function AdminLogisticsPage() {
               {deliveryZones.map((z) => (
                 <tr key={z.id} className="border-b border-ink/5 last:border-0 hover:bg-cocoa/5">
                   <td className="p-4 font-bold text-ink">{z.name}</td>
-                  <td className="p-4 text-cocoa font-bold">${z.fee.toFixed(2)}</td>
+                  <td className="p-4 text-cocoa font-bold">₹{z.fee.toFixed(2)}</td>
                   <td className="p-4 text-ink-soft">{z.cutoff}</td>
                   <td className="p-4">
                     <Badge tone={z.serviceable ? "positive" : "negative"}>

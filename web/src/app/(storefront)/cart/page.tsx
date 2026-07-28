@@ -99,7 +99,7 @@ export default function CartPage() {
                       <Plus size={12} />
                     </button>
                   </div>
-                  <div className="font-bold text-cocoa">${lineTotal(line).toFixed(2)}</div>
+                  <div className="font-bold text-cocoa">₹{lineTotal(line).toFixed(2)}</div>
                 </div>
               </div>
             </div>
@@ -133,25 +133,25 @@ export default function CartPage() {
           <div className="flex flex-col gap-2 text-sm">
             <div className="flex justify-between">
               <span className="text-ink-soft">Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>₹{subtotal.toFixed(2)}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-cocoa">
                 <span>Discount</span>
-                <span>-${discount.toFixed(2)}</span>
+                <span>-₹{discount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between">
               <span className="text-ink-soft">Delivery Fee</span>
-              <span>${delivery.toFixed(2)}</span>
+              <span>₹{delivery.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-ink-soft">Taxes (5%)</span>
-              <span>${tax.toFixed(2)}</span>
+              <span>₹{tax.toFixed(2)}</span>
             </div>
             <div className="border-t border-ink/10 pt-2 mt-2 flex justify-between font-bold text-lg text-ink">
               <span>Total</span>
-              <span>${total.toFixed(2)}</span>
+              <span>₹{total.toFixed(2)}</span>
             </div>
           </div>
 

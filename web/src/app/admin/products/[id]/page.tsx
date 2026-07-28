@@ -103,7 +103,7 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ id:
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-bold text-ink block mb-1.5">Base Price ($)</label>
+                <label className="text-xs font-bold text-ink block mb-1.5">Base Price (₹)</label>
                 <input
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
@@ -149,7 +149,7 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ id:
               {product.weights.map((w) => (
                 <div key={w.label} className="neu-raised-sm rounded-2xl px-4 py-3 flex items-center justify-between text-sm">
                   <span className="font-semibold text-ink">{w.label}</span>
-                  <span className="text-ink-soft">+${w.priceDelta.toFixed(2)}</span>
+                  <span className="text-ink-soft">+₹{w.priceDelta.toFixed(2)}</span>
                   <button className="text-red-700">
                     <Trash2 size={14} />
                   </button>
@@ -174,7 +174,7 @@ export default function AdminProductEditPage({ params }: { params: Promise<{ id:
                     </span>
                     {a.name}
                   </span>
-                  <span className="text-ink-soft">+${a.price.toFixed(2)}</span>
+                  <span className="text-ink-soft">+₹{a.price.toFixed(2)}</span>
                 </label>
               ))}
             </div>

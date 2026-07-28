@@ -149,7 +149,7 @@ export function ShopClient() {
 
       <div>
         <div className="text-sm font-bold text-ink mb-3">
-          Max Price: ${maxPrice.toFixed(0)}
+          Max Price: ₹{maxPrice.toFixed(0)}
         </div>
         <div className="neu-inset rounded-full p-3">
           <input

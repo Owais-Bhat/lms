@@ -41,7 +41,7 @@ export default function OrdersPage() {
           </div>
 
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="font-bold text-ink">${order.total.toFixed(2)}</div>
+            <div className="font-bold text-ink">₹{order.total.toFixed(2)}</div>
             <div className="flex gap-2">
               <Button variant="ghost" size="sm">
                 <Download size={14} /> Invoice

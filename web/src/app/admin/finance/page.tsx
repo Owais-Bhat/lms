@@ -77,7 +77,7 @@ export default function AdminFinancePage() {
                 <tr key={o.id} className="border-b border-ink/5 last:border-0">
                   <td className="p-4 font-mono text-ink-soft text-xs">{o.id}</td>
                   <td className="p-4 font-semibold text-cocoa">{o.orderNumber}</td>
-                  <td className="p-4 font-semibold text-ink">${o.total.toFixed(2)}</td>
+                  <td className="p-4 font-semibold text-ink">₹{o.total.toFixed(2)}</td>
                   <td className="p-4 text-ink-soft">{o.paymentMethod}</td>
                   <td className="p-4 text-ink-soft">{new Date(o.createdAt).toLocaleDateString()}</td>
                   <td className="p-4">

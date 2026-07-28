@@ -143,7 +143,7 @@ export default function CustomCakeBuilderPage() {
                     )}
                   >
                     <span>{s.label}</span>
-                    <span>${s.price}</span>
+                    <span>₹{s.price}</span>
                   </button>
                 ))}
               </div>
@@ -238,7 +238,7 @@ export default function CustomCakeBuilderPage() {
               <div className="flex justify-between"><span>Frosting</span><span className="font-semibold text-ink">{frosting}</span></div>
               {message && <div className="flex justify-between"><span>Message</span><span className="font-semibold text-ink">&ldquo;{message}&rdquo;</span></div>}
               <div className="flex justify-between text-lg font-bold text-ink border-t border-ink/10 pt-2 mt-1">
-                <span>Total</span><span>${price.toFixed(2)}</span>
+                <span>Total</span><span>₹{price.toFixed(2)}</span>
               </div>
             </div>
           </div>

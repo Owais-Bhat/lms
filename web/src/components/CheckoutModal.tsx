@@ -178,21 +178,21 @@ export function CheckoutModal({ isOpen, onClose }: CheckoutModalProps) {
             <div className="neu-flat rounded-2xl p-4 space-y-2 bg-cocoa/5 text-xs">
               <div className="flex justify-between text-ink-soft">
                 <span>Subtotal ({lines.length} items)</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-ink-soft">
                 <span>Delivery Fee</span>
-                <span>{deliveryFee === 0 ? "FREE" : `$${deliveryFee.toFixed(2)}`}</span>
+                <span>{deliveryFee === 0 ? "FREE" : `₹${deliveryFee.toFixed(2)}`}</span>
               </div>
               <div className="flex justify-between font-extrabold text-sm text-cocoa pt-2 border-t border-ink/10">
                 <span>Total Amount</span>
-                <span>${total.toFixed(2)}</span>
+                <span>₹{total.toFixed(2)}</span>
               </div>
             </div>
 
             <Button type="submit" size="lg" className="w-full justify-center gap-2" disabled={submitting}>
               {submitting ? <Loader2 size={18} className="animate-spin" /> : <CreditCard size={18} />}
-              {submitting ? "Placing Order..." : `Place Order ($${total.toFixed(2)})`}
+              {submitting ? "Placing Order..." : `Place Order (₹${total.toFixed(2)})`}
             </Button>
           </form>
         )}

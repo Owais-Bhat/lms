@@ -86,7 +86,7 @@ export function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDrawerProps)
                     <div className="font-bold text-sm text-ink truncate">{line.name}</div>
                     <div className="text-xs text-ink-soft">{line.weightLabel}</div>
                     <div className="text-sm font-extrabold text-cocoa mt-1">
-                      ${lineTotal(line).toFixed(2)}
+                      ₹{lineTotal(line).toFixed(2)}
                     </div>
                   </div>
 
@@ -125,7 +125,7 @@ export function CartDrawer({ isOpen, onClose, onOpenCheckout }: CartDrawerProps)
             <div className="p-6 border-t border-ink/10 space-y-4 bg-base-light">
               <div className="flex justify-between items-center text-sm font-bold text-ink">
                 <span>Subtotal</span>
-                <span className="text-base font-extrabold text-cocoa">${subtotal.toFixed(2)}</span>
+                <span className="text-base font-extrabold text-cocoa">₹{subtotal.toFixed(2)}</span>
               </div>
               <div className="text-[11px] text-ink-soft">Taxes & delivery calculated at checkout</div>
 

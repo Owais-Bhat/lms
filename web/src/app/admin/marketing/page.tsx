@@ -83,8 +83,8 @@ export default function AdminMarketingPage() {
               {couponList.map((c) => (
                 <tr key={c.code} className="border-b border-ink/5 last:border-0 hover:bg-cocoa/5">
                   <td className="p-4 font-mono font-extrabold text-cocoa">{c.code}</td>
-                  <td className="p-4 font-bold text-ink">{c.type === "Percent" ? `${c.value}% OFF` : `$${c.value} OFF`}</td>
-                  <td className="p-4 text-ink-soft">${c.minOrder}</td>
+                  <td className="p-4 font-bold text-ink">{c.type === "Percent" ? `${c.value}% OFF` : `₹${c.value} OFF`}</td>
+                  <td className="p-4 text-ink-soft">₹{c.minOrder}</td>
                   <td className="p-4 text-ink-soft font-semibold">
                     {c.uses}/{c.limit}
                   </td>
@@ -181,7 +181,7 @@ export default function AdminMarketingPage() {
                     className="neu-inset rounded-2xl p-3 text-xs text-ink outline-none w-full font-semibold bg-transparent"
                   >
                     <option value="Percent">Percentage (% OFF)</option>
-                    <option value="Flat">Fixed Amount ($ OFF)</option>
+                    <option value="Flat">Fixed Amount (₹ OFF)</option>
                   </select>
                 </div>
 

@@ -7,14 +7,14 @@ export default function RewardsPage() {
       <div className="neu-raised rounded-3xl p-8 text-center">
         <IconBubble icon={Gift} size={64} className="mx-auto mb-4" />
         <div className="text-3xl font-bold text-ink mb-1">240 points</div>
-        <div className="text-sm text-ink-soft">= $2.40 towards your next order</div>
+        <div className="text-sm text-ink-soft">= ₹2.40 towards your next order</div>
       </div>
 
       <div className="neu-raised rounded-3xl p-6">
         <div className="text-sm font-bold text-ink mb-3">How to Earn</div>
         <ul className="text-sm text-ink-soft flex flex-col gap-2">
           <li className="flex items-center gap-2">
-            <Star size={14} className="text-cocoa" /> Earn 1 point for every $1 spent
+            <Star size={14} className="text-cocoa" /> Earn 1 point for every ₹1 spent
           </li>
           <li className="flex items-center gap-2">
             <Star size={14} className="text-cocoa" /> 50 bonus points on your birthday month

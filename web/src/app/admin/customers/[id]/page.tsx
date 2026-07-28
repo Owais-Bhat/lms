@@ -47,7 +47,7 @@ export default function AdminCustomerDetailPage({ params }: { params: Promise<{ 
           <div className="text-xs text-ink-soft">Total Orders</div>
         </div>
         <div className="neu-raised rounded-3xl p-5">
-          <div className="text-2xl font-bold text-ink">${customer.ltv.toFixed(2)}</div>
+          <div className="text-2xl font-bold text-ink">₹{customer.ltv.toFixed(2)}</div>
           <div className="text-xs text-ink-soft">Lifetime Value</div>
         </div>
         <div className="neu-raised rounded-3xl p-5">
@@ -69,7 +69,7 @@ export default function AdminCustomerDetailPage({ params }: { params: Promise<{ 
                   {o.orderNumber}
                 </Link>
                 <span className="text-ink-soft">{new Date(o.createdAt).toLocaleDateString()}</span>
-                <span className="font-semibold text-ink">${o.total.toFixed(2)}</span>
+                <span className="font-semibold text-ink">₹{o.total.toFixed(2)}</span>
               </div>
             ))}
           </div>

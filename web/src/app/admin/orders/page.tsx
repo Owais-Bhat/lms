@@ -175,7 +175,7 @@ export default function AdminOrdersPage() {
                     )}
                   </div>
                 </td>
-                <td className="p-4 font-extrabold text-ink">${o.total.toFixed(2)}</td>
+                <td className="p-4 font-extrabold text-ink">₹{o.total.toFixed(2)}</td>
                 <td className="p-4">
                   <span className="neu-raised-sm rounded-full px-2.5 py-1 text-[11px] font-semibold text-cocoa">
                     {o.paymentMethod}

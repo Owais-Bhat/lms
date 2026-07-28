@@ -125,7 +125,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             )}
             <div className="border-t border-ink/10 mt-4 pt-4 flex justify-between font-bold text-ink">
               <span>Total</span>
-              <span>${order.total.toFixed(2)}</span>
+              <span>₹{order.total.toFixed(2)}</span>
             </div>
           </div>
 
